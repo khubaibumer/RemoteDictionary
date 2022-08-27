@@ -6,9 +6,9 @@
 
 std::unordered_map<tid_t, CurrentThread*> ThreadPool::threadsRegistry_;
 
-ThreadPool::ThreadPool(size_t numThread) : threadCount_(numThread)
+ThreadPool::ThreadPool(size_t numThread)
+	: threadCount_(numThread), registryLock_(std::make_unique<SpinLock>("ThreadRegistry"))
 {
-	registryLock_ = std::make_unique<SpinLock>("ThreadRegistry");
 }
 
 void ThreadPool::Destroy()

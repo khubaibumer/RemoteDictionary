@@ -60,7 +60,7 @@ std::string ServerReport::getSummary()
 {
 	nlohmann::json stats;
 	long min = LONG_MAX, max = 0, count = 0;
-	unsigned long avg = 0;
+	unsigned long avgSum = 0;
 	{
 		TAKE_LOCK(statsLock_);
 		for (const auto& itr : perThreadStats_)
@@ -70,19 +70,18 @@ std::string ServerReport::getSummary()
 			auto _avg = itr.second->getAvg();
 			min = ((min < _min) ? min : _min);
 			max = ((max > _max) ? max : _max);
-			avg += _avg;
+			avgSum += _avg;
 			++count;
 		}
 	}
 	stats["Min"] = min;
-	stats["Avg"] = avg;
+	stats["Avg"] = (avgSum/count);
 	stats["Max"] = max;
 	return stats.dump();
 }
 
-ServerReport::ServerReport()
+ServerReport::ServerReport() : statsLock_(std::make_unique<SpinLock>("StatsLock"))
 {
-	statsLock_ = std::make_unique<SpinLock>("StatsLock");
 }
 
 void ServerReport::reportTxnTime(long timeTaken)

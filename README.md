@@ -38,4 +38,3 @@
     -i, --ip               Server IP Address
     -p, --port             Port Number
     -b, --benchmark        Enables Benchmarking (Enabled by Default)
-

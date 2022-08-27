@@ -121,7 +121,7 @@ namespace Communication
 		while (_this->isRunning_)
 		{
 			auto ready = epoll_wait(_this->efd_, _this->clientEvents_, kMaxEvents, -1);
-			for (auto i = 0; i < ready; ++i)
+			for (auto i = 0; i < ready && i < kMaxEvents; ++i)
 			{
 				if ((_this->clientEvents_[i].events & EPOLLERR) ||
 					(_this->clientEvents_[i].events & EPOLLHUP) ||

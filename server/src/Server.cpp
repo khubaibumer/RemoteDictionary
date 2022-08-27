@@ -152,7 +152,7 @@ namespace Communication
 				else
 				{
 					char msg[512] = { 0 };
-					auto msgSz = read(_this->clientEvents_[i].data.fd, msg, sizeof msg);
+					auto msgSz = read(_this->clientEvents_[i].data.fd, msg, sizeof msg - 1);
 					if (msgSz == -1)
 					{
 						// errno should be EAGAIN

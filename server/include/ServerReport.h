@@ -69,7 +69,6 @@ private:
 private:
 	std::unordered_map<tid_t, ThreadStatsPtr> perThreadStats_;
 	std::unique_ptr<SpinLock> statsLock_;
-
 };
 
 #define reporter ServerReport::getInstance()

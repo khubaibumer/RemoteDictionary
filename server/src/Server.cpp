@@ -252,7 +252,6 @@ namespace Communication
 				return ConsumeStatsRequest(jsonReq);
 			default:
 				return invalidRequest.dump();
-
 			}
 		}
 		catch (const std::exception& ex)

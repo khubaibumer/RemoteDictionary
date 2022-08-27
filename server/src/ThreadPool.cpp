@@ -77,7 +77,6 @@ void ThreadPool::AddJob(Communication::ServerRequest* request)
 
 CurrentThread* ThreadPool::GetSuitableThread()
 {
-
 	const auto& min = std::min_element(threadsRegistry_.begin(), threadsRegistry_.end(),
 		[](const auto& l, const auto& r)
 		{

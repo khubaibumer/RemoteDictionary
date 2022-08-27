@@ -48,7 +48,6 @@ int main(int argc, char** argv)
 				std::cout << "Response: " << response << std::endl;
 			}
 		}
-
 	}
 
 	while (true)

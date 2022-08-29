@@ -30,7 +30,7 @@ protected:
 	uint64_t getMask(const std::string& key) override
 	{
 		auto hs = (hash_(key) % 64);
-		return ((1 << hs) - 1);
+		return (1 << hs);
 	}
 
 private:

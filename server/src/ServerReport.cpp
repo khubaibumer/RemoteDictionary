@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <climits>
 #include "../include/ServerReport.h"
-#include "../include/Current.h"
+#include "../include/Thread.h"
 
 ServerReport* ServerReport::getInstance()
 {

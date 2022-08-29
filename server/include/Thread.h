@@ -56,7 +56,6 @@ public:
 
 	void Run();
 
-
 	void Stop()
 	{
 		isRunning_ = false;

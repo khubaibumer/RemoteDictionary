@@ -75,7 +75,7 @@ std::string ServerReport::getSummary()
 		}
 	}
 	stats["Min"] = min;
-	stats["Avg"] = (avgSum/count);
+	stats["Avg"] = (avgSum / count);
 	stats["Max"] = max;
 	return stats.dump();
 }

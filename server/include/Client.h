@@ -71,22 +71,10 @@ namespace Communication
 		std::string port_;
 	};
 
-	enum class RequestType : int8_t
-	{
-		SERVE_CLIENT = 11,
-		REMOVE_CLIENT
-	};
-
 	struct ServerRequest
 	{
-		ServerRequest(RequestType type, int cfd, char* req, size_t reqLen)
-			: type_(type), cfd_(cfd), request_(req), requestLen_(reqLen)
-		{
-			start_ = std::chrono::high_resolution_clock::now();
-		}
-
-		ServerRequest(RequestType type, int cfd)
-			: type_(type), cfd_(cfd)
+		ServerRequest(int cfd, char* req, size_t reqLen)
+			: cfd_(cfd), request_(req), requestLen_(reqLen)
 		{
 			start_ = std::chrono::high_resolution_clock::now();
 		}
@@ -95,15 +83,7 @@ namespace Communication
 		{
 			end_ = std::chrono::high_resolution_clock::now();
 			auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
-			if (type_ == RequestType::SERVE_CLIENT)
-			{
-				reporter->reportTxnTime(microseconds);
-			}
-		}
-
-		[[nodiscard]] RequestType getRequestType() const
-		{
-			return type_;
+//			reporter->reportTxnTime(microseconds);
 		}
 
 		[[nodiscard]] constexpr int getFd() const
@@ -122,7 +102,6 @@ namespace Communication
 		}
 
 	private:
-		RequestType type_;
 		std::string request_;
 		size_t requestLen_{};
 		std::chrono::high_resolution_clock::time_point start_;

@@ -18,6 +18,7 @@
 #include "../../Types.h"
 
 class ThreadPool;
+class Thread;
 
 namespace Communication
 {
@@ -44,13 +45,11 @@ namespace Communication
 
 		static void* RxThreadRoutine(void* args);
 
-		int AcceptClient();
+		[[nodiscard]] std::unique_ptr<Client> AcceptClient() const;
 
-		void RemoveClient(ServerRequest* req);
+		static std::string GetResponse(const std::unique_ptr<ServerRequest>& req);
 
-		static std::string GetResponse(ServerRequest* req);
-
-		size_t SendResponse(int fd, const std::string& response);
+		static size_t SendResponse(const std::unique_ptr<Client>& client, const std::string& response);
 
 		static std::string ConsumeGetRequest(const nlohmann::json& req);
 
@@ -58,12 +57,11 @@ namespace Communication
 
 		static std::string ConsumeStatsRequest(const nlohmann::json& req);
 
-		void CloseAllClients();
-
 		static std::string ConsumeUpdateRequest(const nlohmann::json& req);
 
 	private:
 		friend ThreadPool;
+		friend Thread;
 		const int threadPoolSize_;
 		const bool enableFilter_;
 		int fd_{};
@@ -71,8 +69,6 @@ namespace Communication
 		std::string ip_;
 		uint16_t port_{};
 		std::atomic_bool isRunning_{};
-		std::unique_ptr<SpinLock> clientLock_;
-		std::unordered_map<int, std::shared_ptr<Client>> clientMap_;
 		int efd_{};
 		epoll_event serverEvent_{};
 		epoll_event* clientEvents_{};

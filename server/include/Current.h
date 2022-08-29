@@ -8,51 +8,45 @@
 #include <memory>
 #include <semaphore.h>
 #include <list>
+#include <sys/epoll.h>
 #include "Client.h"
 #include "LockLessQ.h"
+#include "Server.h"
 
-struct RequestNode
-{
-	Communication::ServerRequest* req_;
-	std::atomic<RequestNode*> next_;
+//struct RequestNode
+//{
+//	Communication::ServerRequest* req_;
+//	std::atomic<RequestNode*> next_;
+//
+//	explicit RequestNode(Communication::ServerRequest* ptr) : req_(ptr), next_(nullptr)
+//	{
+//	}
+//
+//	RequestNode() = delete;
+//};
 
-	explicit RequestNode(Communication::ServerRequest* ptr) : req_(ptr), next_(nullptr)
-	{
-	}
-
-	RequestNode() = delete;
-};
-
-class CurrentThread
+class Thread
 {
 public:
-	static CurrentThread* getInstance();
+	~Thread();
+
+	static Thread* getInstance();
 
 	[[nodiscard]] tid_t getTid() const
 	{
 		return tid_;
 	}
 
-	void PostJob(Communication::ServerRequest* req)
-	{
-		jobQ_->enqueue(new RequestNode(req));
-		++currentLoad_;
-		sem_post(&sem_);
-	}
+	void AddClient(std::unique_ptr<Communication::Client> client);
 
-	Communication::ServerRequest* GetJob()
+	void RemoveClient(int fd)
 	{
-		if (!jobQ_->is_empty())
+		auto client = clientMap_.find(fd);
+		if (client != clientMap_.end())
 		{
-			auto node = jobQ_->dequeue();
-			if (node != nullptr)
-			{
-				auto job = node->req_;
-				delete node;
-				return job;
-			}
+			clientMap_.erase(fd);
+			--currentLoad_;
 		}
-		return nullptr;
 	}
 
 	[[nodiscard]] size_t GetLoad() const
@@ -60,19 +54,29 @@ public:
 		return currentLoad_;
 	}
 
-	void WaitForJob()
+	void Run();
+
+
+	void Stop()
 	{
-		sem_wait(&sem_);
+		isRunning_ = false;
 	}
 
 private:
-	CurrentThread();
+	Thread();
 
 private:
 	tid_t tid_;
 	sem_t sem_{};
 	std::atomic_uint64_t currentLoad_;
-	std::unique_ptr<LockLessQ<RequestNode>> jobQ_;
+	std::atomic_bool isRunning_;
+	int efd_{};
+	epoll_event event_{};
+	epoll_event* clientEvents_{};
+	char* inMsg_;
+	const size_t inMsgSize_;
+	std::unique_ptr<Communication::ServerRequest> req_;
+	std::unordered_map<tid_t, std::unique_ptr<Communication::Client>> clientMap_;
 };
 
-#define currentThread CurrentThread::getInstance()
+#define currentThread Thread::getInstance()

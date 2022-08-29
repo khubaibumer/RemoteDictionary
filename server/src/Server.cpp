@@ -25,7 +25,6 @@ namespace Communication
 	{
 		assert(!ip_.empty());
 		assert(port_ != kInvalidPort);
-		clientLock_ = std::make_unique<SpinLock>("ClientLock");
 		StartServer();
 	}
 
@@ -44,18 +43,8 @@ namespace Communication
 		threadPool_->Destroy();
 		pthread_cancel(rxThread_);
 		free(this->clientEvents_);
-		CloseAllClients();
-		shutdown(fd_, SHUT_RDWR);
+		shutdown(fd_, SHUT_RD);
 		close(fd_);
-	}
-
-	void Server::CloseAllClients()
-	{
-		TAKE_LOCK(clientLock_);
-		for (const auto& [fd, client] : clientMap_)
-		{
-			close(fd);
-		}
 	}
 
 	void Server::StartServer()
@@ -100,7 +89,6 @@ namespace Communication
 	bool Server::StartWorkerPool()
 	{
 		threadPool_ = std::make_unique<ThreadPool>(threadPoolSize_);
-		threadPool_->SetServerInstance(this);
 		return threadPool_->Ignite();
 	}
 
@@ -127,54 +115,22 @@ namespace Communication
 					(_this->clientEvents_[i].events & EPOLLHUP) ||
 					(!(_this->clientEvents_[i].events & EPOLLIN)))
 				{
-					_this->threadPool_->AddJob(new ServerRequest(RequestType::REMOVE_CLIENT,
-						_this->clientEvents_[i].data.fd));
 					continue;
 				}
 				else if (_this->fd_ == _this->clientEvents_[i].data.fd)
 				{
 					while (true)
 					{
-						auto clientFd = _this->AcceptClient();
-						if (clientFd != -1)
+						auto clientPtr = _this->AcceptClient();
+						if (clientPtr != nullptr)
 						{
-							_this->MakeNonBlockSocket(clientFd);
-							_this->serverEvent_.data.fd = clientFd;
-							_this->serverEvent_.events = EPOLLIN | EPOLLET;
-							assert(epoll_ctl(_this->efd_, EPOLL_CTL_ADD, clientFd, &_this->serverEvent_) != -1);
+							_this->MakeNonBlockSocket(clientPtr->getFd());
+							_this->threadPool_->AddClient(std::move(clientPtr));
 						}
 						else
 						{
 							break;
 						}
-					}
-				}
-				else
-				{
-					char msg[512] = { 0 };
-					auto msgSz = read(_this->clientEvents_[i].data.fd, msg, sizeof msg - 1);
-					if (msgSz == -1)
-					{
-						// errno should be EAGAIN
-						if (errno != EAGAIN)
-						{
-							// Close this client
-							// Remove from client Map
-							_this->threadPool_->AddJob(new ServerRequest(RequestType::REMOVE_CLIENT,
-								_this->clientEvents_[i].data.fd));
-						}
-					}
-					else if (msgSz == 0)
-					{
-						// Close this client
-						// Remove from client Map
-						_this->threadPool_->AddJob(new ServerRequest(RequestType::REMOVE_CLIENT,
-							_this->clientEvents_[i].data.fd));
-					}
-					else
-					{
-						_this->threadPool_->AddJob(new ServerRequest(RequestType::SERVE_CLIENT,
-							_this->clientEvents_[i].data.fd, msg, msgSz));
 					}
 				}
 			}
@@ -183,7 +139,7 @@ namespace Communication
 		return nullptr;
 	}
 
-	int Server::AcceptClient()
+	std::unique_ptr<Client> Server::AcceptClient() const
 	{
 		sockaddr addr{};
 		socklen_t len = sizeof addr;
@@ -193,38 +149,21 @@ namespace Communication
 		auto cfd = accept(fd_, &addr, &len);
 		if (cfd == -1)
 		{
-			return cfd;
+			return nullptr;
 		}
 
 		auto ret = getnameinfo(&addr, len, host, sizeof host, port, sizeof port, NI_NUMERICHOST | NI_NUMERICSERV);
 		if (ret == 0)
 		{
-			auto client = std::make_shared<Client>(cfd, host, port);
+			auto client = std::make_unique<Client>(cfd, host, port);
 			client->setAddr(&addr);
 			client->setAddrLen(len);
-			TAKE_LOCK(clientLock_);
-			clientMap_.emplace(cfd, client);
-			return cfd;
+			return client;
 		}
-		return -1;
+		return {};
 	}
 
-	void Server::RemoveClient(ServerRequest* request)
-	{
-		const auto cfd = request->getFd();
-		TAKE_LOCK(clientLock_);
-		auto it = clientMap_.find(cfd);
-		if (it == clientMap_.end())
-		{
-			// Shouldn't happen
-			return;
-		}
-		auto client = it->second;
-		clientMap_.erase(it);
-		close(client->getFd());
-	}
-
-	std::string Server::GetResponse(ServerRequest* req)
+	std::string Server::GetResponse(const std::unique_ptr<ServerRequest>& req)
 	{
 		static const nlohmann::json invalidRequest = {
 			{ "REQUEST", "INVALID" },
@@ -260,16 +199,8 @@ namespace Communication
 		}
 	}
 
-	size_t Server::SendResponse(int fd, const std::string& response)
+	size_t Server::SendResponse(const std::unique_ptr<Client>& client, const std::string& response)
 	{
-		std::shared_ptr<Client> client;
-		{
-			TAKE_LOCK(clientMap_);
-			auto itr = clientMap_.find(fd);
-			if (itr == clientMap_.end() || itr->second == nullptr)
-				return 0;
-			client = itr->second;
-		}
 		return sendto(client->getFd(), response.c_str(), response.size(), 0, client->getAddr(), client->getAddrLen());
 	}
 
@@ -285,6 +216,7 @@ namespace Communication
 		};
 		return rep.dump();
 	}
+
 	std::string Server::ConsumeSetRequest(const nlohmann::json& req)
 	{
 		const auto& key = req["KEY"];

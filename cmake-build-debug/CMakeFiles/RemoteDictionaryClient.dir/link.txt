@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/RemoteDictionaryClient.dir/client/src/main.cpp.o CMakeFiles/RemoteDictionaryClient.dir/client/src/Client.cpp.o -o RemoteDictionaryClient 

@@ -46,6 +46,7 @@ void Thread::Run()
 	efd_ = epoll_create1(0);
 	assert(efd_ != -1);
 
+	const static timespec sleep = { .tv_sec = 0, .tv_nsec = 5 };
 	clientEvents_ = static_cast<epoll_event*>(calloc(kMaxEvents, sizeof event_));
 	assert(clientEvents_ != nullptr);
 	while (isRunning_)
@@ -81,6 +82,7 @@ void Thread::Run()
 				}
 				else
 				{
+					nanosleep(&sleep, nullptr);
 					inMsg_.buffer_[msgSz] = 0x00;
 					inMsg_.buffer_[msgSz + 1] = 0x00;
 					const auto& client = clientMap_[fd];

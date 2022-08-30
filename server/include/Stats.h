@@ -51,7 +51,7 @@ public:
 		summary["Bytes (Out)"] = out;
 		summary["Bytes (In)"] = in;
 		summary["TimeTaken"] = time;
-		auto speed = ((time  == 0) ? 0 : ((in + out) / time));
+		auto speed = ((time == 0) ? 0 : ((in + out) / time));
 		summary["Throughput (kbps)"] = speed;
 
 		return summary.dump();

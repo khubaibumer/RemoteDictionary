@@ -24,6 +24,7 @@ namespace Communication
 
 	Client::~Client()
 	{
+		sem_destroy(&sem_);
 		shutdown(fd_, SHUT_RDWR);
 		close(fd_);
 	}

@@ -85,5 +85,4 @@ namespace Communication
 		std::unique_ptr<ThreadPool> threadPool_;
 		static const std::unordered_map<std::string, StatType> statTypeMap_;
 	};
-
 } // Communication

@@ -46,5 +46,4 @@ namespace Communication
 		socklen_t addrLen_{};
 		sem_t sem_{};
 	};
-
 } // Communication

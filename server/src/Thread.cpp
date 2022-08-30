@@ -12,7 +12,6 @@ static constexpr size_t kMaxEvents = 64;
 Thread::Thread() : currentLoad_(0), isRunning_(true)
 {
 	tid_ = syscall(SYS_gettid);
-	lock_ = std::make_unique<SpinLock>("Thread" + std::to_string(tid_));
 }
 
 Thread::~Thread()

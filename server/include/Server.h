@@ -43,11 +43,11 @@ namespace Communication
 
 		bool StartWorkerPool();
 
+		[[nodiscard]] std::unique_ptr<Client> AcceptClient() const;
+
 		static bool MakeNonBlockSocket(int fd);
 
 		static void* RxThreadRoutine(void* args);
-
-		[[nodiscard]] std::unique_ptr<Client> AcceptClient() const;
 
 		static std::string GetResponse(const std::unique_ptr<ServerRequest>& req);
 

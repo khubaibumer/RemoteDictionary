@@ -125,7 +125,7 @@ namespace Communication
 						if (clientPtr != nullptr)
 						{
 							_this->MakeNonBlockSocket(clientPtr->getFd());
-							_this->threadPool_->AddClient(std::move(clientPtr));
+							ThreadPool::AddClient(std::move(clientPtr));
 						}
 						else
 						{

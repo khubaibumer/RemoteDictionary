@@ -14,16 +14,18 @@ static struct option long_options[] =
 int main(int argc, char** argv)
 {
 	auto options = getProgramOptions(argc, argv, "i:p:j:f", long_options);
-	auto server = Communication::Server(options);
-
-	server.StartServing();
-	std::string msg;
-	while (true)
 	{
-		std::cin >> msg;
-		if (msg == "quit")
-			break;
+		auto server = Communication::Server(options);
+
+		server.StartServing();
+		std::string msg;
+		while (true)
+		{
+			std::cin >> msg;
+			if (msg == "quit")
+				break;
+		}
 	}
-	std::cout << "Hello, World!" << std::endl;
+	std::cout << "Server is Closing!!" << std::endl;
 	return 0;
 }

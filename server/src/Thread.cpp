@@ -88,7 +88,8 @@ void Thread::Run()
 					inMsg_[msgSz + 1] = 0x00;
 					const auto& client = clientMap_[fd];
 					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_, msgSz);
-					Communication::Server::SendResponse(client, Communication::Server::GetResponse(req_));
+					req_->SetResponseSize(Communication::Server::SendResponse(client,
+						Communication::Server::GetResponse(req_)));
 				}
 			}
 		}

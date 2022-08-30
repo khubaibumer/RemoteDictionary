@@ -9,8 +9,6 @@
 #include "Thread.h"
 #include "Server.h"
 
-class ServerReport;
-
 class ThreadPool
 {
 public:
@@ -30,10 +28,8 @@ private:
 	static Thread* GetSuitableThread();
 
 private:
-	friend ServerReport;
-
-	std::unique_ptr<SpinLock> registryLock_;
 	const size_t threadCount_;
+	std::unique_ptr<SpinLock> registryLock_;
 	std::vector<pthread_t> threadPool_;
 	static std::unordered_map<tid_t, Thread*> threadsRegistry_;
 };

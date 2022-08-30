@@ -13,9 +13,12 @@ ThreadPool::ThreadPool(size_t numThread)
 
 void ThreadPool::Destroy()
 {
-	for (const auto& [id, thr] : threadsRegistry_)
 	{
-		thr->Stop();
+		TAKE_LOCK(registryLock_);
+		for (const auto& [id, thr] : threadsRegistry_)
+		{
+			thr->Stop();
+		}
 	}
 	for (const auto& tid : threadPool_)
 	{

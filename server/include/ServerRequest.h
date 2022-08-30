@@ -7,6 +7,7 @@
 #include <chrono>
 #include <string>
 #include "Thread.h"
+#include "Stats.h"
 
 namespace Communication
 {
@@ -22,8 +23,7 @@ namespace Communication
 		{
 			end_ = std::chrono::high_resolution_clock::now();
 			auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
-			std::cout << "Request " << request_ << requestLen_ << "-bytes" << " took " << microseconds <<
-			          "-microseconds" << std::endl;
+			Stats::ReportTxn(new TxnData(requestLen_, responseLen_, microseconds));
 		}
 
 		[[nodiscard]] constexpr int getFd() const
@@ -41,10 +41,16 @@ namespace Communication
 			return request_;
 		}
 
+		void SetResponseSize(size_t sz)
+		{
+			responseLen_ = sz;
+		}
+
 	private:
 		const int cfd_;
 		const std::string request_;
 		const size_t requestLen_{};
+		size_t responseLen_{};
 		std::chrono::high_resolution_clock::time_point start_;
 		std::chrono::high_resolution_clock::time_point end_;
 	};

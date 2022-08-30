@@ -45,14 +45,14 @@ public:
 	[[nodiscard]] std::string GetSummary() const
 	{
 		nlohmann::json summary;
-		auto out = responseSz_.load();
-		auto in = requestSz_.load();
-		auto time = static_cast<uint64_t>(static_cast<double>(timeTaken_.load()) / 1000.0f);
-		summary["Bytes (Out)"] = out;
-		summary["Bytes (In)"] = in;
-		summary["TimeTaken"] = time;
+		auto out = static_cast<double>(responseSz_.load()) / 1000.0f;
+		auto in = static_cast<double>(requestSz_.load()) / 1000.0f;
+		auto time = static_cast<double>(timeTaken_.load()) / 1000.0f;
 		auto speed = ((time == 0) ? 0 : ((in + out) / time));
-		summary["Throughput (kbps)"] = speed;
+		summary["KB (Out)"] = out;
+		summary["KB (In)"] = in;
+		summary["TimeTaken (ms)"] = time;
+		summary["Throughput (Mbps)"] = speed * 8;
 
 		return summary.dump();
 	}
@@ -74,7 +74,7 @@ public:
 	[[nodiscard]] std::string GetAvgTime() const
 	{
 		nlohmann::json summary;
-		summary["AvgTimeTaken"] = static_cast<size_t>(timeTaken_ / reqCount_);
+		summary["AvgTimeTaken"] = static_cast<size_t>(timeTaken_.load() / reqCount_.load());
 		return summary.dump();
 	}
 

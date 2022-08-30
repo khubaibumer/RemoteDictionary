@@ -20,13 +20,13 @@
 >> Get Stats for GET request
 
 > STATS min
->> Get Per Worker Thread Minimum Response Time
+>> Get Minimum Response Time
 
 > STATS max
->> Get Per Worker Thread Maximum Response Time
+>> Get Maximum Response Time
 
 > STATS avg
->> Get Per Worker Thread Average Response Time
+>> Get Average Response Time
 
 > STATS summary
 >> Get OverAll Response Time
@@ -42,4 +42,4 @@
 
     -i, --ip               Server IP Address
     -p, --port             Port Number
-    -b, --benchmark        Enables Benchmarking (Enabled by Default)
+    -b, --benchmark        Enables Benchmarking (Disabled by Default)

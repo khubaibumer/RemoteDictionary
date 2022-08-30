@@ -35,8 +35,8 @@ Stats::Stats()
 			auto stat = node->stat_;
 			delete node;
 
-			_this->responseSz_ += (8 * stat->respLen_);
-			_this->requestSz_ += (8 * stat->reqLen_);
+			_this->responseSz_ += stat->respLen_;
+			_this->requestSz_ += stat->reqLen_;
 			_this->timeTaken_ += stat->time_;
 
 			if (_this->minTimeTaken_ > stat->time_)

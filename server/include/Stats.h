@@ -48,11 +48,11 @@ public:
 		auto out = static_cast<double>(responseSz_.load()) / 1000.0f;
 		auto in = static_cast<double>(requestSz_.load()) / 1000.0f;
 		auto time = static_cast<double>(timeTaken_.load()) / 1000.0f;
-		auto speed = ((time == 0) ? 0 : ((in + out) / time));
+		auto speed = ((time == 0) ? 0 : ((in + out) / time)) * 8;
 		summary["KB (Out)"] = out;
 		summary["KB (In)"] = in;
 		summary["TimeTaken (ms)"] = time;
-		summary["Throughput (Mbps)"] = speed * 8;
+		summary["Throughput (Mbps)"] = speed;
 
 		return summary.dump();
 	}
@@ -60,21 +60,21 @@ public:
 	[[nodiscard]] std::string GetMaxTime() const
 	{
 		nlohmann::json summary;
-		summary["MaxTimeTaken"] = maxTimeTaken_.load();
+		summary["MaxTimeTaken (us)"] = maxTimeTaken_.load();
 		return summary.dump();
 	}
 
 	[[nodiscard]] std::string GetMinTime() const
 	{
 		nlohmann::json summary;
-		summary["MinTimeTaken"] = minTimeTaken_.load();
+		summary["MinTimeTaken (us)"] = minTimeTaken_.load();
 		return summary.dump();
 	}
 
 	[[nodiscard]] std::string GetAvgTime() const
 	{
 		nlohmann::json summary;
-		summary["AvgTimeTaken"] = static_cast<size_t>(timeTaken_.load() / reqCount_.load());
+		summary["AvgTimeTaken (us)"] = static_cast<size_t>(timeTaken_.load() / reqCount_.load());
 		return summary.dump();
 	}
 

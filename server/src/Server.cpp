@@ -28,11 +28,11 @@ namespace Communication
 		StartServer();
 	}
 
-	const std::unordered_map<std::string, StatType> statTypeMap_({{ "max", StatType::MAX_TIME },
-	                                                              { "min", StatType::MIN_TIME },
-	                                                              { "avg", StatType::AVG_TIME },
-	                                                              { "summary", StatType::SUMMARY },
-	                                                              { "dictionary", StatType::DICTIONARY }});
+	const std::unordered_map<std::string, StatType> Server::statTypeMap_({{ "max", StatType::MAX_TIME },
+	                                                                      { "min", StatType::MIN_TIME },
+	                                                                      { "avg", StatType::AVG_TIME },
+	                                                                      { "summary", StatType::SUMMARY },
+	                                                                      { "dictionary", StatType::DICTIONARY }});
 	Server::Server(const ProgramOptions& ops)
 		: threadPoolSize_((ops.threadCount_ == 0) ? kThreadPoolSize : ops.threadCount_),
 		  ip_(ops.ip_), port_(ops.port_), enableFilter_(ops.enableFilter_), isRunning_(true)

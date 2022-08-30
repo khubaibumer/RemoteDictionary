@@ -22,6 +22,7 @@ namespace Communication
 
 	Client::~Client()
 	{
+		shutdown(fd_, SHUT_RDWR);
 		close(fd_);
 	}
 

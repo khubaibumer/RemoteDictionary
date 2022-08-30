@@ -68,14 +68,14 @@ Result Dictionary::getStats(const std::string& statType) const
 {
 	switch (GetStatType(statType))
 	{
-	case StatType::MAX_TIME:
-		return { ResultStatus::SUCCESS, reporter->getMaxResponseTime() };
-	case StatType::MIN_TIME:
-		return { ResultStatus::SUCCESS, reporter->getMinResponseTime() };
-	case StatType::AVG_TIME:
-		return { ResultStatus::SUCCESS, reporter->getAvgResponseTime() };
-	case StatType::SUMMARY:
-		return { ResultStatus::SUCCESS, reporter->getSummary() };
+//	case StatType::MAX_TIME:
+//		return { ResultStatus::SUCCESS, reporter->getMaxResponseTime() };
+//	case StatType::MIN_TIME:
+//		return { ResultStatus::SUCCESS, reporter->getMinResponseTime() };
+//	case StatType::AVG_TIME:
+//		return { ResultStatus::SUCCESS, reporter->getAvgResponseTime() };
+//	case StatType::SUMMARY:
+//		return { ResultStatus::SUCCESS, reporter->getSummary() };
 	case StatType::DICTIONARY:
 		return { ResultStatus::SUCCESS, this->stats() };
 	default:

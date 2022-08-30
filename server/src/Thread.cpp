@@ -3,8 +3,9 @@
 //
 
 #include <cassert>
-#include <cxxabi.h>
 #include "../include/Thread.h"
+#include "../include/ServerRequest.h"
+#include "../include/Server.h"
 
 static constexpr size_t kMaxEvents = 64;
 
@@ -13,6 +14,9 @@ Thread::Thread() : currentLoad_(0), inMsgSize_(1024), isRunning_(true)
 	tid_ = syscall(SYS_gettid);
 	sem_init(&sem_, 0, 0);
 	inMsg_ = static_cast<char*>(calloc(inMsgSize_, sizeof(char)));
+//	time_ = std::make_unique<Stats>();
+//	ingress_ = std::make_unique<Stats>();
+//	egress_ = std::make_unique<Stats>();
 }
 
 Thread::~Thread()
@@ -34,6 +38,7 @@ Thread* Thread::getInstance()
 
 void Thread::AddClient(std::unique_ptr<Communication::Client> client)
 {
+	std::cout << "New Client added! " << client->str() << std::endl;
 	event_.data.fd = client->getFd();
 	event_.events = EPOLLIN | EPOLLET;
 	assert(epoll_ctl(efd_, EPOLL_CTL_ADD, client->getFd(), &event_) != -1);
@@ -85,8 +90,9 @@ void Thread::Run()
 					inMsg_[msgSz] = 0x00;
 					inMsg_[msgSz + 1] = 0x00;
 					const auto& client = clientMap_[fd];
-					req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_, msgSz);
-					Communication::Server::SendResponse(client, Communication::Server::GetResponse(req_));
+					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_, msgSz);
+					req_->SetResponseLen(Communication::Server::SendResponse(client,
+						Communication::Server::GetResponse(req_)));
 				}
 			}
 		}

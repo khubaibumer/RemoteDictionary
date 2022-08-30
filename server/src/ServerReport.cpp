@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <climits>
 #include "../include/ServerReport.h"
+#include "../include/ThreadPool.h"
 #include "../include/Thread.h"
 
 ServerReport* ServerReport::getInstance()
@@ -17,13 +18,10 @@ ServerReport* ServerReport::getInstance()
 std::string ServerReport::getAvgResponseTime()
 {
 	std::ostringstream os;
-	{
-		TAKE_LOCK(statsLock_);
-		for (const auto& itr : perThreadStats_)
-		{
-			os << "Thread ID: " << itr.first << " AvgTime: " << itr.second->getAvg() << ",";
-		}
-	}
+//	for (const auto& [id, thread] : ThreadPool::threadsRegistry_)
+//	{
+//		os << "Thread ID: " << id << " AvgTime: " << thread->getAvgTime() << ",";
+//	}
 	auto str = os.str();
 	return str.substr(0, str.size() - 1);
 }
@@ -31,13 +29,10 @@ std::string ServerReport::getAvgResponseTime()
 [[maybe_unused]] std::string ServerReport::getMaxResponseTime()
 {
 	std::ostringstream os;
-	{
-		TAKE_LOCK(statsLock_);
-		for (const auto& itr : perThreadStats_)
-		{
-			os << "Thread ID: " << itr.first << " MaxTime: " << itr.second->getMax() << ",";
-		}
-	}
+//	for (const auto& [id, thread] : ThreadPool::threadsRegistry_)
+//	{
+//		os << "Thread ID: " << id << " AvgTime: " << thread->getMaxTime() << ",";
+//	}
 	auto str = os.str();
 	return str.substr(0, str.size() - 1);
 }
@@ -45,13 +40,10 @@ std::string ServerReport::getAvgResponseTime()
 std::string ServerReport::getMinResponseTime()
 {
 	std::ostringstream os;
-	{
-		TAKE_LOCK(statsLock_);
-		for (const auto& itr : perThreadStats_)
-		{
-			os << "Thread ID: " << itr.first << " MinTime: " << itr.second->getMin() << ",";
-		}
-	}
+//	for (const auto& [id, thread] : ThreadPool::threadsRegistry_)
+//	{
+//		os << "Thread ID: " << id << " AvgTime: " << thread->getMinTime() << ",";
+//	}
 	auto str = os.str();
 	return str.substr(0, str.size() - 1);
 }
@@ -59,44 +51,29 @@ std::string ServerReport::getMinResponseTime()
 std::string ServerReport::getSummary()
 {
 	nlohmann::json stats;
-	long min = LONG_MAX, max = 0, count = 0;
-	unsigned long avgSum = 0;
-	{
-		TAKE_LOCK(statsLock_);
-		for (const auto& itr : perThreadStats_)
-		{
-			auto _max = itr.second->getMax();
-			auto _min = itr.second->getMin();
-			auto _avg = itr.second->getAvg();
-			min = ((min < _min) ? min : _min);
-			max = ((max > _max) ? max : _max);
-			avgSum += _avg;
-			++count;
-		}
-	}
-	stats["Min"] = min;
-	stats["Avg"] = (avgSum / count);
-	stats["Max"] = max;
-	return stats.dump();
+	size_t totalTime = 0, totalEgress = 0, totalIngress = 0, count = 0;
+//	{
+//		for (const auto& [id, thread] : ThreadPool::threadsRegistry_)
+//		{
+//			if (thread->GetLoad() != 0)
+//			{
+//				totalTime += thread->getTotalTime();
+//				totalEgress += thread->getTotalEgress();
+//				totalIngress += thread->getTotalIngress();
+//				++count;
+//			}
+//		}
+//	}
+//	auto inSpeed = (8 * totalIngress) / (totalTime / 1000);
+//	auto outSpeed = (8 * totalEgress) / (totalTime / 1000);
+//	auto speed = inSpeed + outSpeed;
+//	stats["Throughput Ingress (kbps)"] = inSpeed;
+//	stats["Throughput Egress (kbps)"] = outSpeed;
+//	stats["Throughput (kbps)"] = speed;
+//	return stats.dump();
+	return {};
 }
 
-ServerReport::ServerReport() : statsLock_(std::make_unique<SpinLock>("StatsLock"))
+ServerReport::ServerReport() /*: statsLock_(std::make_unique<SpinLock>("StatsLock"))*/
 {
-}
-
-void ServerReport::reportTxnTime(long timeTaken)
-{
-	auto tid = currentThread->getTid();
-	TAKE_LOCK(statsLock_);
-	const auto& it = perThreadStats_.find(tid);
-	if (it == perThreadStats_.end())
-	{
-		auto stats = std::make_unique<ThreadStats>();
-		*stats += timeTaken;
-		perThreadStats_.emplace(tid, std::move(stats));
-	}
-	else
-	{
-		*it->second += timeTaken;
-	}
 }

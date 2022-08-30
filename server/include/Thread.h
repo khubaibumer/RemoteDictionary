@@ -10,20 +10,6 @@
 #include <list>
 #include <sys/epoll.h>
 #include "Client.h"
-#include "LockLessQ.h"
-#include "Server.h"
-
-//struct RequestNode
-//{
-//	Communication::ServerRequest* req_;
-//	std::atomic<RequestNode*> next_;
-//
-//	explicit RequestNode(Communication::ServerRequest* ptr) : req_(ptr), next_(nullptr)
-//	{
-//	}
-//
-//	RequestNode() = delete;
-//};
 
 class Thread
 {
@@ -32,12 +18,14 @@ public:
 
 	static Thread* getInstance();
 
+	void AddClient(std::unique_ptr<Communication::Client> client);
+
+	void Run();
+
 	[[nodiscard]] tid_t getTid() const
 	{
 		return tid_;
 	}
-
-	void AddClient(std::unique_ptr<Communication::Client> client);
 
 	void RemoveClient(int fd)
 	{
@@ -54,12 +42,79 @@ public:
 		return currentLoad_;
 	}
 
-	void Run();
-
 	void Stop()
 	{
 		isRunning_ = false;
 	}
+
+/*	void reportTxn(size_t egress, size_t ingress, size_t time)
+	{
+		*time_ += time;
+		*ingress_ += ingress;
+		*egress_ += egress;
+	}
+
+	[[nodiscard]] size_t getMinTime() const
+	{
+		return time_->getMin();
+	}
+
+	[[nodiscard]] size_t getAvgTime() const
+	{
+		return time_->getAvg();
+	}
+
+	[[nodiscard]] size_t getMaxTime() const
+	{
+		return time_->getMax();
+	}
+
+	[[nodiscard]] size_t getTotalTime() const
+	{
+		return time_->getSum();
+	}
+
+	*//* Egress *//*
+	[[nodiscard]] size_t getMinEgress() const
+	{
+		return egress_->getMin();
+	}
+
+	[[nodiscard]] size_t getAvgEgress() const
+	{
+		return egress_->getAvg();
+	}
+
+	[[nodiscard]] size_t getMaxEgress() const
+	{
+		return egress_->getMax();
+	}
+
+	[[nodiscard]] size_t getTotalEgress() const
+	{
+		return egress_->getSum();
+	}
+
+	*//* Ingress *//*
+	[[nodiscard]] size_t getMinIngress() const
+	{
+		return ingress_->getMin();
+	}
+
+	[[nodiscard]] size_t getAvgIngress() const
+	{
+		return ingress_->getAvg();
+	}
+
+	[[nodiscard]] size_t getMaxIngress() const
+	{
+		return ingress_->getMax();
+	}
+
+	[[nodiscard]] size_t getTotalIngress() const
+	{
+		return ingress_->getSum();
+	}*/
 
 private:
 	Thread();
@@ -74,7 +129,9 @@ private:
 	epoll_event* clientEvents_{};
 	char* inMsg_;
 	const size_t inMsgSize_;
-	std::unique_ptr<Communication::ServerRequest> req_;
+//	std::unique_ptr<Stats> time_;
+//	std::unique_ptr<Stats> ingress_;
+//	std::unique_ptr<Stats> egress_;
 	std::unordered_map<tid_t, std::unique_ptr<Communication::Client>> clientMap_;
 };
 

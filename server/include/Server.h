@@ -16,9 +16,11 @@
 #include <semaphore.h>
 #include "Client.h"
 #include "../../Types.h"
+#include "ServerRequest.h"
 
 class ThreadPool;
 class Thread;
+class ServerRequest;
 
 namespace Communication
 {

@@ -220,6 +220,7 @@ namespace Communication
 	std::string Server::ConsumeSetRequest(const nlohmann::json& req)
 	{
 		const auto& key = req["KEY"];
+		auto dummy = req.dump();
 		auto response = Dictionary::getInstance()->insert(key, req["VALUE"]);
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::SET },
@@ -233,6 +234,7 @@ namespace Communication
 	std::string Server::ConsumeUpdateRequest(const nlohmann::json& req)
 	{
 		const auto& key = req["KEY"];
+		auto dummy = req.dump();
 		auto response = Dictionary::getInstance()->update(key, req["VALUE"]);
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::UPDATE },

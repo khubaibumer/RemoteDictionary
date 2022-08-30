@@ -32,9 +32,15 @@ int main(int argc, char** argv)
 			{ "SET some-key value1" },
 			{ "SET some-key value2" },
 			{ "UPDATE some-key value2" },
+			{ "SET somekey value3" },
+			{ "GET somekey" },
+			{ "UPDATE somekey value4" },
+			{ "SET somekey value5" },
 			{ "GET somekey" },
 			{ "GET some-key" },
-			{ "STATS dictionary" },
+			{ "GET some-key" },
+			{ "GET somekey1" },
+			{ "STATS dictionary" }
 		};
 
 		for (auto i = 0; i < 10000; ++i)

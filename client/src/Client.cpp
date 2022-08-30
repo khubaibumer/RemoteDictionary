@@ -94,12 +94,15 @@ namespace Communication
 	std::string Client::CreateSetRequest(const std::string& msg)
 	{
 		auto pos = msg.find(' ');
-		auto key = msg.substr(0, pos);
-		auto value = msg.substr(pos + 1, msg.size());
-		if (!value.empty())
+		if (pos != std::string::npos)
 		{
-			nlohmann::json request = {{ "REQUEST", ServerRequestType::SET }, { "KEY", key }, { "VALUE", value }};
-			return request.dump();
+			auto key = msg.substr(0, pos);
+			auto value = msg.substr(pos + 1, msg.size());
+			if (!value.empty())
+			{
+				nlohmann::json request = {{ "REQUEST", ServerRequestType::SET }, { "KEY", key }, { "VALUE", value }};
+				return request.dump();
+			}
 		}
 		return {};
 	}
@@ -107,12 +110,15 @@ namespace Communication
 	std::string Client::CreateUpdateRequest(const std::string& msg)
 	{
 		auto pos = msg.find(' ');
-		auto key = msg.substr(0, pos);
-		auto value = msg.substr(pos + 1, msg.size());
-		if (!value.empty())
+		if (pos != std::string::npos)
 		{
-			nlohmann::json request = {{ "REQUEST", ServerRequestType::UPDATE }, { "KEY", key }, { "VALUE", value }};
-			return request.dump();
+			auto key = msg.substr(0, pos);
+			auto value = msg.substr(pos + 1, msg.size());
+			if (!value.empty())
+			{
+				nlohmann::json request = {{ "REQUEST", ServerRequestType::UPDATE }, { "KEY", key }, { "VALUE", value }};
+				return request.dump();
+			}
 		}
 		return {};
 	}

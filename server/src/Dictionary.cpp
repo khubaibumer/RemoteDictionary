@@ -3,7 +3,7 @@
 //
 
 #include "../include/Dictionary.h"
-#include "../include/ServerReport.h"
+#include "../include/Stats.h"
 
 Dictionary* Dictionary::getInstance()
 {
@@ -69,13 +69,13 @@ Result Dictionary::getStats(const std::string& statType) const
 	switch (GetStatType(statType))
 	{
 	case StatType::MAX_TIME:
-		return { ResultStatus::SUCCESS, reporter->getMaxResponseTime() };
+		return { ResultStatus::SUCCESS, Stats::getInstance()->GetMaxTime() };
 	case StatType::MIN_TIME:
-		return { ResultStatus::SUCCESS, reporter->getMinResponseTime() };
+		return { ResultStatus::SUCCESS, Stats::getInstance()->GetMinTime() };
 	case StatType::AVG_TIME:
-		return { ResultStatus::SUCCESS, reporter->getAvgResponseTime() };
+		return { ResultStatus::SUCCESS, Stats::getInstance()->GetAvgTime() };
 	case StatType::SUMMARY:
-		return { ResultStatus::SUCCESS, reporter->getSummary() };
+		return { ResultStatus::SUCCESS, Stats::getInstance()->GetSummary() };
 	case StatType::DICTIONARY:
 		return { ResultStatus::SUCCESS, this->stats() };
 	default:

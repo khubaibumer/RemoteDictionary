@@ -4,7 +4,7 @@
 
 #include "../include/ThreadPool.h"
 
-std::unordered_map<tid_t, CurrentThread*> ThreadPool::threadsRegistry_;
+std::unordered_map<tid_t, Thread*> ThreadPool::threadsRegistry_;
 
 ThreadPool::ThreadPool(size_t numThread)
 	: threadCount_(numThread), registryLock_(std::make_unique<SpinLock>("ThreadRegistry"))
@@ -13,9 +13,16 @@ ThreadPool::ThreadPool(size_t numThread)
 
 void ThreadPool::Destroy()
 {
-	for (const auto& th : threadPool_)
 	{
-		pthread_cancel(th);
+		TAKE_LOCK(registryLock_);
+		for (const auto& [id, thr] : threadsRegistry_)
+		{
+			thr->Stop();
+		}
+	}
+	for (const auto& tid : threadPool_)
+	{
+		pthread_cancel(tid);
 	}
 }
 
@@ -44,38 +51,17 @@ void* ThreadPool::WorkerThreadRoutine(void* arg)
 {
 	auto _this = (ThreadPool*)arg;
 	_this->RegisterThread();
-	while (_this->server_->isRunning_)
-	{
-		Communication::ServerRequest* req;
-		currentThread->WaitForJob();
-		req = currentThread->GetJob();
-		if (req != nullptr)
-		{
-			std::string response;
-			switch (req->getRequestType())
-			{
-			case Communication::RequestType::REMOVE_CLIENT:
-				_this->server_->RemoveClient(req);
-				break;
-			case Communication::RequestType::SERVE_CLIENT:
-				(void)_this->server_->SendResponse(req->getFd(), Communication::Server::GetResponse(req));
-				break;
-			default:
-				break;
-			}
-		}
-		delete req;
-	}
+	currentThread->Run();
 	return nullptr;
 }
 
-void ThreadPool::AddJob(Communication::ServerRequest* request)
+void ThreadPool::AddClient(std::unique_ptr<Communication::Client> client)
 {
 	auto thread = GetSuitableThread();
-	thread->PostJob(request);
+	thread->AddClient(std::move(client));
 }
 
-CurrentThread* ThreadPool::GetSuitableThread()
+Thread* ThreadPool::GetSuitableThread()
 {
 	const auto& min = std::min_element(threadsRegistry_.begin(), threadsRegistry_.end(),
 		[](const auto& l, const auto& r)
@@ -84,4 +70,5 @@ CurrentThread* ThreadPool::GetSuitableThread()
 		});
 	return min->second;
 }
+
 

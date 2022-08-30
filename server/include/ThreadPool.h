@@ -6,7 +6,7 @@
 
 #include <cstddef>
 #include <unordered_map>
-#include "Current.h"
+#include "Thread.h"
 #include "Server.h"
 
 class ThreadPool
@@ -20,23 +20,17 @@ public:
 
 	void Destroy();
 
-	void SetServerInstance(Communication::Server* server)
-	{
-		server_ = server;
-	}
-
-	static void AddJob(Communication::ServerRequest* request);
+	static void AddClient(std::unique_ptr<Communication::Client> client);
 
 private:
 	static void* WorkerThreadRoutine(void* arg);
 
-	static CurrentThread* GetSuitableThread();
+	static Thread* GetSuitableThread();
 
 private:
-	std::unique_ptr<SpinLock> registryLock_;
 	const size_t threadCount_;
-	Communication::Server* server_{};
+	std::unique_ptr<SpinLock> registryLock_;
 	std::vector<pthread_t> threadPool_;
-	static std::unordered_map<tid_t, CurrentThread*> threadsRegistry_;
+	static std::unordered_map<tid_t, Thread*> threadsRegistry_;
 };
 

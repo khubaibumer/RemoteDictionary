@@ -13,12 +13,7 @@
 #include "Filter.h"
 #include "BloomFilter.h"
 #include "NoFilter.h"
-
-enum class ResultStatus : bool
-{
-	FAILED = false,
-	SUCCESS = true
-};
+#include "../../Types.h"
 
 enum class StatType : int8_t
 {
@@ -28,16 +23,6 @@ enum class StatType : int8_t
 	MAX_TIME,
 	SUMMARY,
 	DICTIONARY
-};
-
-struct Result
-{
-	Result(ResultStatus status, std::string value) : status_(status), value_(std::move(value))
-	{
-	}
-
-	ResultStatus status_;
-	std::string value_;
 };
 
 class Dictionary

@@ -6,12 +6,11 @@
 
 #include <sys/socket.h>
 #include <cstring>
+#include <sstream>
 #include "Lock.h"
-#include "ServerReport.h"
 
 namespace Communication
 {
-
 	class Client
 	{
 	public:
@@ -63,6 +62,13 @@ namespace Communication
 			addrLen_ = len;
 		}
 
+		[[nodiscard]] std::string str() const
+		{
+			std::stringstream os;
+			os << "Host: " << getHost() << " port: " << getPortStr();
+			return os.str();
+		}
+
 	private:
 		int fd_;
 		sockaddr addr_{};
@@ -70,64 +76,4 @@ namespace Communication
 		std::string host_;
 		std::string port_;
 	};
-
-	enum class RequestType : int8_t
-	{
-		SERVE_CLIENT = 11,
-		REMOVE_CLIENT
-	};
-
-	struct ServerRequest
-	{
-		ServerRequest(RequestType type, int cfd, char* req, size_t reqLen)
-			: type_(type), cfd_(cfd), request_(req), requestLen_(reqLen)
-		{
-			start_ = std::chrono::high_resolution_clock::now();
-		}
-
-		ServerRequest(RequestType type, int cfd)
-			: type_(type), cfd_(cfd)
-		{
-			start_ = std::chrono::high_resolution_clock::now();
-		}
-
-		~ServerRequest()
-		{
-			end_ = std::chrono::high_resolution_clock::now();
-			auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
-			if (type_ == RequestType::SERVE_CLIENT)
-			{
-				reporter->reportTxnTime(microseconds);
-			}
-		}
-
-		[[nodiscard]] RequestType getRequestType() const
-		{
-			return type_;
-		}
-
-		[[nodiscard]] constexpr int getFd() const
-		{
-			return cfd_;
-		}
-
-		[[nodiscard]] std::string str() const
-		{
-			return request_ + " received from Client Id: " + std::to_string(cfd_);
-		}
-
-		[[nodiscard]] const std::string& getRequest() const
-		{
-			return request_;
-		}
-
-	private:
-		RequestType type_;
-		std::string request_;
-		size_t requestLen_{};
-		std::chrono::high_resolution_clock::time_point start_;
-		std::chrono::high_resolution_clock::time_point end_;
-		int cfd_;
-	};
-
 } // Communication

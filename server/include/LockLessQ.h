@@ -1,12 +1,9 @@
 //
-// Created by Khubaib.Umer on 8/27/2022.
+// Created by Khubaib.Umer on 8/30/2022.
 //
-
 #pragma once
 
 #include <memory>
-#include <atomic>
-
 #include <atomic>
 
 template<class T>

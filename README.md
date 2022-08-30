@@ -1,4 +1,5 @@
 # RemoteDictionary
+
 [![CodeFactor](https://www.codefactor.io/repository/github/khubaibumer/remotedictionary/badge)](https://www.codefactor.io/repository/github/khubaibumer/remotedictionary)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/07ee2ee2ec934ddb8ae3491dd40a678e)](https://www.codacy.com/gh/khubaibumer/RemoteDictionary/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=khubaibumer/RemoteDictionary&amp;utm_campaign=Badge_Grade)
 [![Softacheck](https://softacheck.com/app/repository/khubaibumer/RemoteDictionary/badge)](https://softacheck.com/app/repository/khubaibumer/RemoteDictionary/issues)
@@ -19,13 +20,13 @@
 >> Get Stats for GET request
 
 > STATS min
->> Get Per Worker Thread Minimum Response Time
+>> Get Minimum Response Time
 
 > STATS max
->> Get Per Worker Thread Maximum Response Time
+>> Get Maximum Response Time
 
 > STATS avg
->> Get Per Worker Thread Average Response Time
+>> Get Average Response Time
 
 > STATS summary
 >> Get OverAll Response Time
@@ -41,4 +42,4 @@
 
     -i, --ip               Server IP Address
     -p, --port             Port Number
-    -b, --benchmark        Enables Benchmarking (Enabled by Default)
+    -b, --benchmark        Enables Benchmarking (Disabled by Default)

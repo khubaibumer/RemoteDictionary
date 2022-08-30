@@ -20,7 +20,7 @@ public:
 
 	void Destroy();
 
-	static void AddClient(std::unique_ptr<Communication::Client> client);
+	static void AddClient(std::shared_ptr<Communication::Client> client);
 
 private:
 	static void* WorkerThreadRoutine(void* arg);

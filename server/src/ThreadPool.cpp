@@ -55,7 +55,7 @@ void* ThreadPool::WorkerThreadRoutine(void* arg)
 	return nullptr;
 }
 
-void ThreadPool::AddClient(std::unique_ptr<Communication::Client> client)
+void ThreadPool::AddClient(std::shared_ptr<Communication::Client> client)
 {
 	auto thread = GetSuitableThread();
 	thread->AddClient(std::move(client));

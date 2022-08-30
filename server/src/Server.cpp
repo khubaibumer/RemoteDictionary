@@ -144,7 +144,7 @@ namespace Communication
 		return nullptr;
 	}
 
-	std::unique_ptr<Client> Server::AcceptClient() const
+	std::shared_ptr<Client> Server::AcceptClient() const
 	{
 		sockaddr addr{};
 		socklen_t len = sizeof addr;
@@ -160,7 +160,7 @@ namespace Communication
 		auto ret = getnameinfo(&addr, len, host, sizeof host, port, sizeof port, NI_NUMERICHOST | NI_NUMERICSERV);
 		if (ret == 0)
 		{
-			auto client = std::make_unique<Client>(cfd, host, port);
+			auto client = std::make_shared<Client>(cfd, host, port);
 			client->setAddr(&addr);
 			client->setAddrLen(len);
 			return client;
@@ -204,7 +204,7 @@ namespace Communication
 		}
 	}
 
-	size_t Server::SendResponse(const std::unique_ptr<Client>& client, const std::string& response)
+	size_t Server::SendResponse(const std::shared_ptr<Client>& client, const std::string& response)
 	{
 		LV resp(response.c_str(), response.size());
 		return sendto(client->getFd(), &resp, sizeof resp, 0, client->getAddr(), client->getAddrLen());

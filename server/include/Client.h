@@ -18,8 +18,6 @@ namespace Communication
 		{
 		}
 
-		Client(const Client&) = default;
-
 		explicit Client(const std::pair<std::string, uint16_t>& url);
 
 		[[nodiscard]] const std::string& getHost() const

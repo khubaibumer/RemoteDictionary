@@ -12,6 +12,7 @@ static constexpr size_t kMaxEvents = 64;
 Thread::Thread() : currentLoad_(0), isRunning_(true)
 {
 	tid_ = syscall(SYS_gettid);
+	lock_ = std::make_unique<SpinLock>("Thread" + std::to_string(tid_));
 }
 
 Thread::~Thread()
@@ -30,9 +31,10 @@ Thread* Thread::getInstance()
 	return &instance;
 }
 
-void Thread::AddClient(std::unique_ptr<Communication::Client> client)
+void Thread::AddClient(std::shared_ptr<Communication::Client> client)
 {
 	std::cout << "New Client added! " << client->str() << std::endl;
+	TAKE_LOCK(lock_);
 	auto fd = client->getFd();
 	event_.data.fd = client->getFd();
 	event_.events = EPOLLIN | EPOLLET;
@@ -46,7 +48,6 @@ void Thread::Run()
 	efd_ = epoll_create1(0);
 	assert(efd_ != -1);
 
-	const static timespec sleep = { .tv_sec = 0, .tv_nsec = 5 };
 	clientEvents_ = static_cast<epoll_event*>(calloc(kMaxEvents, sizeof event_));
 	assert(clientEvents_ != nullptr);
 	while (isRunning_)
@@ -82,11 +83,14 @@ void Thread::Run()
 				}
 				else
 				{
-					nanosleep(&sleep, nullptr);
 					inMsg_.buffer_[msgSz] = 0x00;
 					inMsg_.buffer_[msgSz + 1] = 0x00;
-					const auto& client = clientMap_[fd];
+					std::shared_ptr<Communication::Client> client;
 					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_.buffer_, msgSz);
+					{
+						TAKE_LOCK(lock_);
+						client = clientMap_[fd];
+					}
 					req_->SetResponseSize(Communication::Server::SendResponse(client,
 						Communication::Server::GetResponse(req_)));
 				}

@@ -34,7 +34,7 @@ void Thread::AddClient(std::unique_ptr<Communication::Client> client)
 {
 	std::cout << "New Client added! " << client->str() << std::endl;
 	auto fd = client->getFd();
-	event_.data.fd = client->getFd();
+	event_.data.fd = fd;
 	event_.events = EPOLLIN | EPOLLET;
 	clientMap_.emplace(fd, std::move(client));
 	assert(epoll_ctl(efd_, EPOLL_CTL_ADD, fd, &event_) != -1);
@@ -84,9 +84,8 @@ void Thread::Run()
 					inMsg_.buffer_[msgSz] = 0x00;
 					inMsg_.buffer_[msgSz + 1] = 0x00;
 					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_.buffer_, msgSz);
-					const auto &client = clientMap_[fd];
-					req_->SetResponseSize(Communication::Server::SendResponse(client,
-						Communication::Server::GetResponse(req_)));
+					auto response = Communication::Server::GetResponse(req_);
+					req_->SetResponseSize(Communication::Server::SendResponse(clientMap_[fd], response));
 				}
 			}
 		}

@@ -4,8 +4,8 @@
 
 static struct option long_options[] =
 	{
-		{ "ip_", optional_argument, nullptr, 'i' },
-		{ "port_", optional_argument, nullptr, 'p' },
+		{ "ip", optional_argument, nullptr, 'i' },
+		{ "port", optional_argument, nullptr, 'p' },
 		{ "threads", required_argument, nullptr, 'j' },
 		{ "enable_filter", no_argument, nullptr, 'f' },
 		{ nullptr, 0, nullptr, 0 }

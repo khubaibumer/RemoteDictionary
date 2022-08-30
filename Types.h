@@ -56,3 +56,13 @@ private:
 	ResultStatus status_;
 	const std::string value_;
 };
+
+enum class StatType : int8_t
+{
+	INVALID = -1,
+	MIN_TIME,
+	AVG_TIME,
+	MAX_TIME,
+	SUMMARY,
+	DICTIONARY
+};

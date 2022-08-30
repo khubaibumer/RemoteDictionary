@@ -15,16 +15,6 @@
 #include "NoFilter.h"
 #include "../../Types.h"
 
-enum class StatType : int8_t
-{
-	INVALID = -1,
-	MIN_TIME,
-	AVG_TIME,
-	MAX_TIME,
-	SUMMARY,
-	DICTIONARY
-};
-
 class Dictionary
 {
 public:
@@ -35,8 +25,6 @@ public:
 	Result insert(const std::string& key, const std::string& value);
 
 	Result update(const std::string& key, const std::string& value);
-
-	Result getStats(const std::string& statType) const;
 
 	void enableFilter(bool enableFilter)
 	{
@@ -50,9 +38,6 @@ public:
 		}
 	}
 
-private:
-	Dictionary();
-
 	[[nodiscard]] std::string stats() const
 	{
 		std::ostringstream os;
@@ -62,18 +47,14 @@ private:
 		return os.str();
 	}
 
-	StatType GetStatType(const std::string& stat) const
-	{
-		const auto& it = statTypeMap_.find(stat);
-		return ((it == statTypeMap_.end()) ? StatType::INVALID : it->second);
-	}
+private:
+	Dictionary();
 
 private:
 	const std::string failure_;
 	const std::string duplicate_;
 	const std::string success_;
 	const std::string invalidStat_;
-	const std::unordered_map<std::string, StatType> statTypeMap_;
 	std::unique_ptr<Filter> filter_;
 	std::unordered_map<std::string, std::string> dictionary_;
 	std::atomic_int64_t getOpsCnt_;

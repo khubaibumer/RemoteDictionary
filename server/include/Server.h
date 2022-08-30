@@ -45,6 +45,8 @@ namespace Communication
 
 		[[nodiscard]] std::unique_ptr<Client> AcceptClient() const;
 
+		static Result GetStats(const std::string& statType);
+
 		static bool MakeNonBlockSocket(int fd);
 
 		static void* RxThreadRoutine(void* args);
@@ -61,6 +63,12 @@ namespace Communication
 
 		static std::string ConsumeUpdateRequest(const nlohmann::json& req);
 
+		static StatType GetStatType(const std::string& stat)
+		{
+			const auto& it = statTypeMap_.find(stat);
+			return ((it == statTypeMap_.end()) ? StatType::INVALID : it->second);
+		}
+
 	private:
 		friend ThreadPool;
 		friend Thread;
@@ -75,6 +83,7 @@ namespace Communication
 		epoll_event serverEvent_{};
 		epoll_event* clientEvents_{};
 		std::unique_ptr<ThreadPool> threadPool_;
+		static const std::unordered_map<std::string, StatType> statTypeMap_;
 	};
 
 } // Communication

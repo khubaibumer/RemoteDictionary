@@ -9,8 +9,8 @@
 
 static struct option long_options[] =
 	{
-		{ "ip_", optional_argument, nullptr, 'i' },
-		{ "port_", optional_argument, nullptr, 'p' },
+		{ "ip", optional_argument, nullptr, 'i' },
+		{ "port", optional_argument, nullptr, 'p' },
 		{ "benchmark", optional_argument, nullptr, 'b' },
 		{ nullptr, 0, nullptr, 0 }
 	};

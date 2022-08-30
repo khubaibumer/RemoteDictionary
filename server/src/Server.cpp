@@ -28,6 +28,11 @@ namespace Communication
 		StartServer();
 	}
 
+	const std::unordered_map<std::string, StatType> statTypeMap_({{ "max", StatType::MAX_TIME },
+	                                                              { "min", StatType::MIN_TIME },
+	                                                              { "avg", StatType::AVG_TIME },
+	                                                              { "summary", StatType::SUMMARY },
+	                                                              { "dictionary", StatType::DICTIONARY }});
 	Server::Server(const ProgramOptions& ops)
 		: threadPoolSize_((ops.threadCount_ == 0) ? kThreadPoolSize : ops.threadCount_),
 		  ip_(ops.ip_), port_(ops.port_), enableFilter_(ops.enableFilter_), isRunning_(true)
@@ -247,13 +252,32 @@ namespace Communication
 
 	std::string Server::ConsumeStatsRequest(const nlohmann::json& req)
 	{
-		auto response = Dictionary::getInstance()->getStats(req["KEY"]);
+		auto response = GetStats(req["KEY"]);
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::STATS },
 			{ "STATUS", response.getStatus() },
 			{ "VALUE", response.getValue() }
 		};
 		return rep.dump();
+	}
+
+	Result Server::GetStats(const std::string& statType)
+	{
+		switch (GetStatType(statType))
+		{
+		case StatType::MAX_TIME:
+			return { ResultStatus::SUCCESS, Stats::getInstance()->GetMaxTime() };
+		case StatType::MIN_TIME:
+			return { ResultStatus::SUCCESS, Stats::getInstance()->GetMinTime() };
+		case StatType::AVG_TIME:
+			return { ResultStatus::SUCCESS, Stats::getInstance()->GetAvgTime() };
+		case StatType::SUMMARY:
+			return { ResultStatus::SUCCESS, Stats::getInstance()->GetSummary() };
+		case StatType::DICTIONARY:
+			return { ResultStatus::SUCCESS, Dictionary::getInstance()->stats() };
+		default:
+			return { ResultStatus::FAILED, "Invalid Key" };
+		}
 	}
 
 } // Communication

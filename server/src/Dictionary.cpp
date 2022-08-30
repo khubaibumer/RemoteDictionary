@@ -13,12 +13,7 @@ Dictionary* Dictionary::getInstance()
 
 Dictionary::Dictionary()
 	: failure_("Invalid Key"), duplicate_("Key Already Exists. Try Update"),
-	  success_("Operation Successful"), getFailOpsCnt_(0), getOpsCnt_(0), getSuccessOpsCnt_(0),
-	  statTypeMap_({{ "max", StatType::MAX_TIME },
-	                { "min", StatType::MIN_TIME },
-	                { "avg", StatType::AVG_TIME },
-	                { "summary", StatType::SUMMARY },
-	                { "dictionary", StatType::DICTIONARY }})
+	  success_("Operation Successful"), getFailOpsCnt_(0), getOpsCnt_(0), getSuccessOpsCnt_(0)
 {
 }
 
@@ -62,23 +57,4 @@ Result Dictionary::update(const std::string& key, const std::string& value)
 		}
 	}
 	return { ResultStatus::FAILED, failure_ };
-}
-
-Result Dictionary::getStats(const std::string& statType) const
-{
-	switch (GetStatType(statType))
-	{
-	case StatType::MAX_TIME:
-		return { ResultStatus::SUCCESS, Stats::getInstance()->GetMaxTime() };
-	case StatType::MIN_TIME:
-		return { ResultStatus::SUCCESS, Stats::getInstance()->GetMinTime() };
-	case StatType::AVG_TIME:
-		return { ResultStatus::SUCCESS, Stats::getInstance()->GetAvgTime() };
-	case StatType::SUMMARY:
-		return { ResultStatus::SUCCESS, Stats::getInstance()->GetSummary() };
-	case StatType::DICTIONARY:
-		return { ResultStatus::SUCCESS, this->stats() };
-	default:
-		return { ResultStatus::FAILED, failure_ };
-	}
 }

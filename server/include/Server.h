@@ -43,7 +43,7 @@ namespace Communication
 
 		bool StartWorkerPool();
 
-		[[nodiscard]] std::shared_ptr<Client> AcceptClient() const;
+		[[nodiscard]] std::unique_ptr<Client> AcceptClient() const;
 
 		static Result GetStats(const std::string& statType);
 
@@ -53,7 +53,7 @@ namespace Communication
 
 		static std::string GetResponse(const std::unique_ptr<ServerRequest>& req);
 
-		static size_t SendResponse(const std::shared_ptr<Client>& client, const std::string& response);
+		static size_t SendResponse(const std::unique_ptr<Client>& client, const std::string& response);
 
 		static std::string ConsumeGetRequest(const nlohmann::json& req);
 

@@ -31,10 +31,9 @@ Thread* Thread::getInstance()
 	return &instance;
 }
 
-void Thread::AddClient(std::shared_ptr<Communication::Client> client)
+void Thread::AddClient(std::unique_ptr<Communication::Client> client)
 {
 	std::cout << "New Client added! " << client->str() << std::endl;
-	TAKE_LOCK(lock_);
 	auto fd = client->getFd();
 	event_.data.fd = client->getFd();
 	event_.events = EPOLLIN | EPOLLET;
@@ -85,12 +84,8 @@ void Thread::Run()
 				{
 					inMsg_.buffer_[msgSz] = 0x00;
 					inMsg_.buffer_[msgSz + 1] = 0x00;
-					std::shared_ptr<Communication::Client> client;
 					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_.buffer_, msgSz);
-					{
-						TAKE_LOCK(lock_);
-						client = clientMap_[fd];
-					}
+					const auto &client = clientMap_[fd];
 					req_->SetResponseSize(Communication::Server::SendResponse(client,
 						Communication::Server::GetResponse(req_)));
 				}

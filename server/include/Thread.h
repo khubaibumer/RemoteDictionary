@@ -19,7 +19,7 @@ public:
 
 	static Thread* getInstance();
 
-	void AddClient(std::shared_ptr<Communication::Client> client);
+	void AddClient(std::unique_ptr<Communication::Client> client);
 
 	void Run();
 
@@ -60,8 +60,7 @@ private:
 	epoll_event event_{};
 	epoll_event* clientEvents_{};
 	LV inMsg_{};
-	std::unordered_map<tid_t, std::shared_ptr<Communication::Client>> clientMap_;
-	std::unique_ptr<SpinLock> lock_;
+	std::unordered_map<tid_t, std::unique_ptr<Communication::Client>> clientMap_;
 };
 
 #define currentThread Thread::getInstance()

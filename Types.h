@@ -78,5 +78,5 @@ struct LV
 		memcpy(buffer_, in, len);
 	}
 	size_t len_;
-	char buffer_[512] = { 0 };
+	char buffer_[640] = { 0 };
 };

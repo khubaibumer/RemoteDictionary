@@ -12,7 +12,6 @@ static constexpr size_t kMaxEvents = 64;
 Thread::Thread() : currentLoad_(0), inMsgSize_(1024), isRunning_(true)
 {
 	tid_ = syscall(SYS_gettid);
-	sem_init(&sem_, 0, 0);
 	inMsg_ = static_cast<char*>(calloc(inMsgSize_, sizeof(char)));
 }
 
@@ -20,7 +19,7 @@ Thread::~Thread()
 {
 	for (const auto& [id, client] : clientMap_)
 	{
-		shutdown(client->getFd(), SHUT_RD);
+		shutdown(client->getFd(), SHUT_RDWR);
 		close(client->getFd());
 	}
 	free(clientEvents_);
@@ -60,12 +59,11 @@ void Thread::Run()
 				(!(clientEvents_[i].events & EPOLLIN)))
 			{
 				RemoveClient(clientEvents_[i].data.fd);
-				continue;
 			}
 			else
 			{
-				auto msgSz = read(clientEvents_[i].data.fd, &inMsg_[0], inMsgSize_);
 				int fd = clientEvents_[i].data.fd;
+				auto msgSz = read(fd, &inMsg_[0], inMsgSize_);
 				if (msgSz == -1)
 				{
 					// errno should be EAGAIN

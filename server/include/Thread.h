@@ -7,7 +7,6 @@
 #include <syscall.h>
 #include <memory>
 #include <semaphore.h>
-#include <list>
 #include <sys/epoll.h>
 #include <unordered_map>
 #include "Client.h"
@@ -34,6 +33,7 @@ public:
 		auto client = clientMap_.find(fd);
 		if (client != clientMap_.end())
 		{
+			std::cout << "Removed Client! " << client->second->str() << std::endl;
 			clientMap_.erase(fd);
 			--currentLoad_;
 		}
@@ -54,7 +54,6 @@ private:
 
 private:
 	tid_t tid_;
-	sem_t sem_{};
 	std::atomic_uint64_t currentLoad_;
 	std::atomic_bool isRunning_;
 	int efd_{};

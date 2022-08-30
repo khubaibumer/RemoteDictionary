@@ -17,7 +17,7 @@ Dictionary::Dictionary()
 {
 }
 
-Result Dictionary::fetch(const std::string& key)
+Result Dictionary::get(const std::string& key)
 {
 	++getOpsCnt_;
 	if (filter_->search(key))
@@ -32,7 +32,7 @@ Result Dictionary::fetch(const std::string& key)
 	return { ResultStatus::FAILED, failure_ };
 }
 
-Result Dictionary::insert(const std::string& key, const std::string& value)
+Result Dictionary::set(const std::string& key, const std::string& value)
 {
 	if (filter_->search(key))
 	{

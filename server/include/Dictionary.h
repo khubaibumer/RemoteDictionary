@@ -20,9 +20,9 @@ class Dictionary
 public:
 	static Dictionary* getInstance();
 
-	Result fetch(const std::string& key);
+	Result get(const std::string& key);
 
-	Result insert(const std::string& key, const std::string& value);
+	Result set(const std::string& key, const std::string& value);
 
 	Result update(const std::string& key, const std::string& value);
 

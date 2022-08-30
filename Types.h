@@ -16,6 +16,22 @@ enum class ServerRequestType : int8_t
 	STATS
 };
 
+enum class ResultStatus : uint8_t
+{
+	FAILED = 0,
+	SUCCESS
+};
+
+enum class StatType : int8_t
+{
+	INVALID = -1,
+	MIN_TIME,
+	AVG_TIME,
+	MAX_TIME,
+	SUMMARY,
+	DICTIONARY
+};
+
 struct ProgramOptions
 {
 	ProgramOptions() : threadCount_(0), port_(50003), ip_("127.0.0.1"), enableFilter_(false), benchmark_(false)
@@ -27,12 +43,6 @@ struct ProgramOptions
 	bool enableFilter_;
 	bool benchmark_;
 	std::string ip_;
-};
-
-enum class ResultStatus : uint8_t
-{
-	FAILED = 0,
-	SUCCESS
 };
 
 struct Result
@@ -55,14 +65,4 @@ public:
 private:
 	ResultStatus status_;
 	const std::string value_;
-};
-
-enum class StatType : int8_t
-{
-	INVALID = -1,
-	MIN_TIME,
-	AVG_TIME,
-	MAX_TIME,
-	SUMMARY,
-	DICTIONARY
 };

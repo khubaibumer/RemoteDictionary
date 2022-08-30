@@ -55,6 +55,8 @@ namespace Communication
 
 		static size_t SendResponse(const std::unique_ptr<Client>& client, const std::string& response);
 
+		static size_t SendResponse(int fd, const std::string& response);
+
 		static std::string ConsumeGetRequest(const nlohmann::json& req);
 
 		static std::string ConsumeSetRequest(const nlohmann::json& req);

@@ -16,7 +16,7 @@ Thread::Thread() : currentLoad_(0), isRunning_(true)
 
 Thread::~Thread()
 {
-	for (const auto& [id, client] : clientMap_)
+	for (const auto& client : clients_)
 	{
 		shutdown(client->getFd(), SHUT_RDWR);
 		close(client->getFd());
@@ -36,7 +36,8 @@ void Thread::AddClient(std::unique_ptr<Communication::Client> client)
 	auto fd = client->getFd();
 	event_.data.fd = fd;
 	event_.events = EPOLLIN | EPOLLET;
-	clientMap_.emplace(fd, std::move(client));
+//	clientMap_.emplace(fd, std::move(client));
+	clients_.push_back(std::move(client));
 	assert(epoll_ctl(efd_, EPOLL_CTL_ADD, fd, &event_) != -1);
 	++currentLoad_;
 }
@@ -53,15 +54,15 @@ void Thread::Run()
 		auto ready = epoll_wait(efd_, clientEvents_, kMaxEvents, -1);
 		for (auto i = 0; i < ready && i < kMaxEvents; ++i)
 		{
+			int fd = clientEvents_[i].data.fd;
 			if ((clientEvents_[i].events & EPOLLERR) ||
 				(clientEvents_[i].events & EPOLLHUP) ||
 				(!(clientEvents_[i].events & EPOLLIN)))
 			{
-				RemoveClient(clientEvents_[i].data.fd);
+				RemoveClient(fd);
 			}
 			else
 			{
-				int fd = clientEvents_[i].data.fd;
 				auto msgSz = read(fd, &inMsg_, sizeof inMsg_);
 				if (msgSz == -1)
 				{
@@ -83,9 +84,9 @@ void Thread::Run()
 				{
 					inMsg_.buffer_[msgSz] = 0x00;
 					inMsg_.buffer_[msgSz + 1] = 0x00;
-					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_.buffer_, msgSz);
-					auto response = Communication::Server::GetResponse(req_);
-					req_->SetResponseSize(Communication::Server::SendResponse(clientMap_[fd], response));
+					auto req = std::make_unique<Communication::ServerRequest>(fd, inMsg_.buffer_, msgSz);
+					auto response = Communication::Server::GetResponse(req);
+					req->SetResponseSize(Communication::Server::SendResponse(fd, response));
 				}
 			}
 		}

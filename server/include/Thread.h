@@ -9,6 +9,7 @@
 #include <semaphore.h>
 #include <sys/epoll.h>
 #include <unordered_map>
+#include <vector>
 #include "Client.h"
 #include "../../Types.h"
 
@@ -61,6 +62,7 @@ private:
 	epoll_event* clientEvents_{};
 	LV inMsg_{};
 	std::unordered_map<tid_t, std::unique_ptr<Communication::Client>> clientMap_;
+	std::vector<std::unique_ptr<Communication::Client>> clients_;
 };
 
 #define currentThread Thread::getInstance()

@@ -4,6 +4,7 @@
 
 #pragma once
 #include <iostream>
+#include <string.h>
 
 using tid_t = long;
 
@@ -65,4 +66,17 @@ public:
 private:
 	ResultStatus status_;
 	const std::string value_;
+};
+
+struct LV
+{
+	LV() : len_(0)
+	{
+	}
+	LV(const char* in, size_t len) : len_(len)
+	{
+		memcpy(buffer_, in, len);
+	}
+	size_t len_;
+	char buffer_[512] = { 0 };
 };

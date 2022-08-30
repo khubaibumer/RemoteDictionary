@@ -43,6 +43,9 @@ namespace Communication
 	{
 		auto pos = msg.find(' ');
 		auto type = msg.substr(0, pos);
+		if (pos == std::string::npos)
+			return false;
+
 		auto req = msg.substr(pos + 1, msg.size());
 		std::string request;
 		if (type == "GET")
@@ -77,11 +80,11 @@ namespace Communication
 
 	std::string Client::GetResponse()
 	{
-		char buf[2048] = { 0 };
-		auto read = recvfrom(fd_, buf, sizeof buf, 0, (sockaddr*)&addr_, &addrLen_);
+		LV data;
+		auto read = recvfrom(fd_, &data, sizeof data, 0, (sockaddr*)&addr_, &addrLen_);
 		if (read > 0)
 		{
-			auto response = nlohmann::json::parse(buf);
+			auto response = nlohmann::json::parse(data.buffer_);
 			return response.dump();
 		}
 		return {};

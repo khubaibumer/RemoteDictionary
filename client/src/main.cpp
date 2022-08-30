@@ -15,12 +15,13 @@ static struct option long_options[] =
 		{ nullptr, 0, nullptr, 0 }
 	};
 
-void* rx(void* cli)
+[[noreturn]] void* rx(void* cli)
 {
-	Communication::Client *client = (Communication::Client*)cli;
-	while(true){
+	auto client = (Communication::Client*)cli;
+	while (true)
+	{
 		auto msg = client->GetResponse();
-		std::cout << msg << std::endl;
+		std::cout << "Response: " << msg << std::endl;
 	}
 
 }
@@ -57,15 +58,11 @@ int main(int argc, char** argv)
 			{ "STATS dictionary" }
 		};
 
-		for (auto i = 0; i < 10000; ++i)
+		for (auto i = 0; i < 100000; ++i)
 		{
 			for (const auto& it : testCommands)
 			{
-				std::cout << "Request: " << it << std::endl;
 				client.SendToServer(it);
-//				auto response = client.GetResponse();
-
-//				std::cout << "Response: " << response << std::endl;
 			}
 		}
 	}
@@ -79,12 +76,7 @@ int main(int argc, char** argv)
 		if (inMsg == "quit")
 			break;
 
-		if (client.SendToServer(inMsg))
-		{
-			auto response = client.GetResponse();
-
-			std::cout << "Response: " << response << std::endl;
-		}
+		client.SendToServer(inMsg);
 	}
 	pthread_cancel(rxTid);
 	return 0;

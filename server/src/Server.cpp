@@ -206,7 +206,8 @@ namespace Communication
 
 	size_t Server::SendResponse(const std::unique_ptr<Client>& client, const std::string& response)
 	{
-		return sendto(client->getFd(), response.c_str(), response.size(), 0, client->getAddr(), client->getAddrLen());
+		LV resp(response.c_str(), response.size());
+		return sendto(client->getFd(), &resp, sizeof resp, 0, client->getAddr(), client->getAddrLen());
 	}
 
 	std::string Server::ConsumeGetRequest(const nlohmann::json& req)

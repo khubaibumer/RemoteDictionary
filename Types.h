@@ -5,6 +5,8 @@
 #pragma once
 #include <iostream>
 
+using tid_t = long;
+
 enum class ServerRequestType : int8_t
 {
 	INVALID = -1,
@@ -16,7 +18,7 @@ enum class ServerRequestType : int8_t
 
 struct ProgramOptions
 {
-	ProgramOptions() : threadCount_(0), port_(50003), ip_("127.0.0.1"), enableFilter_(false), benchmark_(true)
+	ProgramOptions() : threadCount_(0), port_(50003), ip_("127.0.0.1"), enableFilter_(false), benchmark_(false)
 	{
 	}
 
@@ -27,5 +29,30 @@ struct ProgramOptions
 	std::string ip_;
 };
 
-using tid_t = long;
+enum class ResultStatus : uint8_t
+{
+	FAILED = 0,
+	SUCCESS
+};
 
+struct Result
+{
+public:
+	Result(ResultStatus status, std::string value) : status_(status), value_(std::move(value))
+	{
+	}
+
+	[[nodiscard]] const std::string& getValue() const
+	{
+		return value_;
+	}
+
+	[[nodiscard]] ResultStatus getStatus() const
+	{
+		return status_;
+	}
+
+private:
+	ResultStatus status_;
+	const std::string value_;
+};

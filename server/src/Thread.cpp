@@ -14,9 +14,6 @@ Thread::Thread() : currentLoad_(0), inMsgSize_(1024), isRunning_(true)
 	tid_ = syscall(SYS_gettid);
 	sem_init(&sem_, 0, 0);
 	inMsg_ = static_cast<char*>(calloc(inMsgSize_, sizeof(char)));
-//	time_ = std::make_unique<Stats>();
-//	ingress_ = std::make_unique<Stats>();
-//	egress_ = std::make_unique<Stats>();
 }
 
 Thread::~Thread()
@@ -91,8 +88,7 @@ void Thread::Run()
 					inMsg_[msgSz + 1] = 0x00;
 					const auto& client = clientMap_[fd];
 					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_, msgSz);
-					req_->SetResponseLen(Communication::Server::SendResponse(client,
-						Communication::Server::GetResponse(req_)));
+					Communication::Server::SendResponse(client, Communication::Server::GetResponse(req_));
 				}
 			}
 		}

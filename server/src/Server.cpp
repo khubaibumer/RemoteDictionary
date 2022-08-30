@@ -211,8 +211,8 @@ namespace Communication
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::GET },
 			{ "KEY", key },
-			{ "STATUS", response.status_ },
-			{ "VALUE", response.value_ }
+			{ "STATUS", response.getStatus() },
+			{ "VALUE", response.getValue() }
 		};
 		return rep.dump();
 	}
@@ -224,8 +224,8 @@ namespace Communication
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::SET },
 			{ "KEY", key },
-			{ "STATUS", response.status_ },
-			{ "VALUE", response.value_ }
+			{ "STATUS", response.getStatus() },
+			{ "VALUE", response.getValue() }
 		};
 		return rep.dump();
 	}
@@ -237,8 +237,8 @@ namespace Communication
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::UPDATE },
 			{ "KEY", key },
-			{ "STATUS", response.status_ },
-			{ "VALUE", response.value_ }
+			{ "STATUS", response.getStatus() },
+			{ "VALUE", response.getValue() }
 		};
 		return rep.dump();
 	}
@@ -248,8 +248,8 @@ namespace Communication
 		auto response = Dictionary::getInstance()->getStats(req["KEY"]);
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::STATS },
-			{ "STATUS", response.status_ },
-			{ "VALUE", response.value_ }
+			{ "STATUS", response.getStatus() },
+			{ "VALUE", response.getValue() }
 		};
 		return rep.dump();
 	}

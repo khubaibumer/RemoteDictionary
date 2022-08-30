@@ -13,7 +13,7 @@ namespace Communication
 	struct ServerRequest
 	{
 		ServerRequest(int cfd, char* req, size_t reqLen)
-			: cfd_(cfd), request_(req), requestLen_(reqLen), responseLen_(0)
+			: cfd_(cfd), request_(req), requestLen_(reqLen)
 		{
 			start_ = std::chrono::high_resolution_clock::now();
 		}
@@ -22,7 +22,8 @@ namespace Communication
 		{
 			end_ = std::chrono::high_resolution_clock::now();
 			auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end_ - start_).count();
-//			currentThread->reportTxn(responseLen_, requestLen_, microseconds);
+			std::cout << "Request " << request_ << requestLen_ << "-bytes" << " took " << microseconds <<
+			          "-microseconds" << std::endl;
 		}
 
 		[[nodiscard]] constexpr int getFd() const
@@ -40,18 +41,12 @@ namespace Communication
 			return request_;
 		}
 
-		void SetResponseLen(size_t len)
-		{
-			responseLen_ = len;
-		}
-
 	private:
-		std::string request_;
-		size_t requestLen_{};
-		size_t responseLen_{};
+		const int cfd_;
+		const std::string request_;
+		const size_t requestLen_{};
 		std::chrono::high_resolution_clock::time_point start_;
 		std::chrono::high_resolution_clock::time_point end_;
-		int cfd_;
 	};
 
 }

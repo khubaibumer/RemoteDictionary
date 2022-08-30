@@ -8,7 +8,6 @@
 #include <cstring>
 #include <sstream>
 #include "Lock.h"
-#include "ServerReport.h"
 
 namespace Communication
 {

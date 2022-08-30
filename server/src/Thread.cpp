@@ -33,10 +33,11 @@ Thread* Thread::getInstance()
 void Thread::AddClient(std::unique_ptr<Communication::Client> client)
 {
 	std::cout << "New Client added! " << client->str() << std::endl;
+	auto fd = client->getFd();
 	event_.data.fd = client->getFd();
 	event_.events = EPOLLIN | EPOLLET;
-	assert(epoll_ctl(efd_, EPOLL_CTL_ADD, client->getFd(), &event_) != -1);
-	clientMap_.emplace(client->getFd(), std::move(client));
+	clientMap_.emplace(fd, std::move(client));
+	assert(epoll_ctl(efd_, EPOLL_CTL_ADD, fd, &event_) != -1);
 	++currentLoad_;
 }
 

@@ -8,6 +8,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "../../Lock.h"
 
 namespace Communication
 {
@@ -18,10 +19,6 @@ namespace Communication
 		explicit Client(const std::pair<std::string, uint16_t>& url);
 
 		~Client();
-
-		Client(const Client&)
-		{
-		};
 
 		Client& operator=(const Client&) = delete;
 
@@ -46,6 +43,7 @@ namespace Communication
 		std::string ip_;
 		sockaddr_in addr_{};
 		socklen_t addrLen_{};
+		std::unique_ptr<SpinLock> sockLock_;
 	};
 
 } // Communication

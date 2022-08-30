@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <cstring>
 #include <sstream>
-#include "Lock.h"
+#include "../../Lock.h"
 
 namespace Communication
 {

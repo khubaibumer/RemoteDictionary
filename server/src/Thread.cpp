@@ -9,10 +9,9 @@
 
 static constexpr size_t kMaxEvents = 64;
 
-Thread::Thread() : currentLoad_(0), inMsgSize_(1024), isRunning_(true)
+Thread::Thread() : currentLoad_(0), isRunning_(true)
 {
 	tid_ = syscall(SYS_gettid);
-	inMsg_ = static_cast<char*>(calloc(inMsgSize_, sizeof(char)));
 }
 
 Thread::~Thread()
@@ -23,7 +22,6 @@ Thread::~Thread()
 		close(client->getFd());
 	}
 	free(clientEvents_);
-	free(inMsg_);
 }
 
 Thread* Thread::getInstance()
@@ -63,7 +61,7 @@ void Thread::Run()
 			else
 			{
 				int fd = clientEvents_[i].data.fd;
-				auto msgSz = read(fd, &inMsg_[0], inMsgSize_);
+				auto msgSz = read(fd, &inMsg_, sizeof inMsg_);
 				if (msgSz == -1)
 				{
 					// errno should be EAGAIN
@@ -82,10 +80,10 @@ void Thread::Run()
 				}
 				else
 				{
-					inMsg_[msgSz] = 0x00;
-					inMsg_[msgSz + 1] = 0x00;
+					inMsg_.buffer_[msgSz] = 0x00;
+					inMsg_.buffer_[msgSz + 1] = 0x00;
 					const auto& client = clientMap_[fd];
-					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_, msgSz);
+					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_.buffer_, msgSz);
 					req_->SetResponseSize(Communication::Server::SendResponse(client,
 						Communication::Server::GetResponse(req_)));
 				}

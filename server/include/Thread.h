@@ -59,8 +59,7 @@ private:
 	int efd_{};
 	epoll_event event_{};
 	epoll_event* clientEvents_{};
-	char* inMsg_;
-	const size_t inMsgSize_;
+	LV inMsg_{};
 	std::unordered_map<tid_t, std::unique_ptr<Communication::Client>> clientMap_;
 };
 

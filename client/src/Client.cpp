@@ -74,7 +74,8 @@ namespace Communication
 			return false;
 		}
 
-		if (sendto(fd_, request.c_str(), request.size(), 0, (sockaddr*)&addr_, addrLen_) == -1)
+		LV outMsg(request.c_str(), request.size());
+		if (sendto(fd_, &outMsg, sizeof outMsg, 0, (sockaddr*)&addr_, addrLen_) == -1)
 		{
 			perror("Send To Server Failed ");
 			return false;

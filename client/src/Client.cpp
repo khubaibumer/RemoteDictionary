@@ -7,6 +7,7 @@
 #include <cstring>
 #include <csignal>
 #include <nlohmann/json.hpp>
+#include <semaphore.h>
 #include "../include/Client.h"
 #include "../../Types.h"
 
@@ -18,7 +19,7 @@ namespace Communication
 		: ip_(url.first), port_(url.second)
 	{
 		assert(port_ != kInvalidPort);
-		sockLock_ = std::make_unique<SpinLock>("SockLock");
+		sem_init(&sem_, 0, 0);
 	}
 
 	Client::~Client()
@@ -71,14 +72,14 @@ namespace Communication
 			std::cerr << "Invalid Request" << std::endl;
 			return false;
 		}
+
+		if (sendto(fd_, request.c_str(), request.size(), 0, (sockaddr*)&addr_, addrLen_) == -1)
 		{
-			TAKE_LOCK(sockLock_);
-			if (sendto(fd_, request.c_str(), request.size(), 0, (sockaddr*)&addr_, addrLen_) == -1)
-			{
-				perror("Send To Server Failed ");
-				return false;
-			}
+			perror("Send To Server Failed ");
+			return false;
 		}
+		sem_post(&sem_);
+
 		return true;
 	}
 
@@ -86,10 +87,9 @@ namespace Communication
 	{
 		LV data;
 		size_t read;
-		{
-			TAKE_LOCK(sockLock_);
-			read = recvfrom(fd_, &data, sizeof data, 0, (sockaddr*)&addr_, &addrLen_);
-		}
+
+		sem_wait(&sem_);
+		read = recvfrom(fd_, &data, sizeof data, 0, (sockaddr*)&addr_, &addrLen_);
 		if (read > 0)
 		{
 			auto response = nlohmann::json::parse(data.buffer_);

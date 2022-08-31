@@ -207,7 +207,7 @@ namespace Communication
 	size_t Server::SendResponse(int fd, const std::string& response)
 	{
 		LV resp(response.c_str(), response.size());
-		return send(fd, &resp, sizeof resp, MSG_NOSIGNAL);
+		return write(fd, &resp, sizeof resp);
 	}
 
 	std::string Server::ConsumeGetRequest(const nlohmann::json& req)

@@ -7,7 +7,6 @@
 #include <cstring>
 #include <csignal>
 #include <nlohmann/json.hpp>
-#include <semaphore.h>
 #include "../include/Client.h"
 #include "../../Types.h"
 
@@ -19,12 +18,10 @@ namespace Communication
 		: ip_(url.first), port_(url.second)
 	{
 		assert(port_ != kInvalidPort);
-		sem_init(&sem_, 0, 0);
 	}
 
 	Client::~Client()
 	{
-		sem_destroy(&sem_);
 		shutdown(fd_, SHUT_RDWR);
 		close(fd_);
 	}
@@ -42,7 +39,7 @@ namespace Communication
 		assert(0 == connect(fd_, (sockaddr*)&addr_, addrLen_));
 	}
 
-	bool Client::SendToServer(const std::string& msg) const
+	bool Client::SendToServer(const std::string& msg)
 	{
 		auto pos = msg.find(' ');
 		auto type = msg.substr(0, pos);
@@ -75,7 +72,8 @@ namespace Communication
 		}
 
 		LV outMsg(request.c_str(), request.size());
-		if (send(fd_, &outMsg, sizeof outMsg, 0) == -1)
+		std::lock_guard<std::mutex> l(lock_);
+		if (write(fd_, &outMsg, sizeof outMsg) == -1)
 		{
 			perror("Send To Server Failed ");
 			return false;
@@ -84,13 +82,16 @@ namespace Communication
 		return true;
 	}
 
-	std::string Client::GetResponse() const
+	std::string Client::GetResponse()
 	{
 		LV data;
-		size_t read;
+		size_t bytes;
 
-		read = recv(fd_, &data, sizeof data, 0);
-		if (read > 0)
+		{
+			std::lock_guard<std::mutex> l(lock_);
+			bytes = read(fd_, &data, sizeof data);
+		}
+		if (bytes > 0)
 		{
 			auto response = nlohmann::json::parse(data.buffer_);
 			return response.dump();

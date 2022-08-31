@@ -15,17 +15,6 @@ static struct option long_options[] =
 		{ nullptr, 0, nullptr, 0 }
 	};
 
-[[noreturn]] void* rx(void* cli)
-{
-	auto client = (Communication::Client*)cli;
-	while (true)
-	{
-		auto msg = client->GetResponse();
-		std::cout << "Response: " << msg << std::endl;
-	}
-
-}
-
 int main(int argc, char** argv)
 {
 	std::cout << "Client started..." << std::endl;
@@ -33,10 +22,6 @@ int main(int argc, char** argv)
 	auto options = getProgramOptions(argc, argv, "i:p:b", long_options);
 	auto client = Communication::Client(std::make_pair(options.ip_, options.port_));
 	client.ConnectServer();
-
-	pthread_t rxTid;
-	pthread_create(&rxTid, nullptr, &rx, &client);
-	pthread_detach(rxTid);
 
 	if (options.benchmark_)
 	{
@@ -63,6 +48,8 @@ int main(int argc, char** argv)
 			for (const auto& it : testCommands)
 			{
 				client.SendToServer(it);
+				auto msg = client.GetResponse();
+				std::cout << msg << std::endl;
 			}
 		}
 	}
@@ -77,7 +64,8 @@ int main(int argc, char** argv)
 			break;
 
 		client.SendToServer(inMsg);
+		auto msg = client.GetResponse();
+		std::cout << msg << std::endl;
 	}
-	pthread_cancel(rxTid);
 	return 0;
 }

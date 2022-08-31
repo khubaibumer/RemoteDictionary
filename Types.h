@@ -68,7 +68,7 @@ private:
 	const std::string value_;
 };
 
-struct LV
+struct __attribute__((packed)) LV
 {
 	LV() : len_(0)
 	{
@@ -78,5 +78,5 @@ struct LV
 		memcpy(buffer_, in, len);
 	}
 	size_t len_;
-	char buffer_[640] = { 0 };
+	char buffer_[786 - sizeof(size_t)] = { 0 };
 };

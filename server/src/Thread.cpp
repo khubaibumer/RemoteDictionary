@@ -62,7 +62,7 @@ void Thread::Run()
 			}
 			else
 			{
-				auto msgSz = recv(fd, &inMsg_, sizeof inMsg_, MSG_NOSIGNAL);
+				auto msgSz = read(fd, &inMsg_, sizeof inMsg_);
 				if (msgSz == -1)
 				{
 					// errno should be EAGAIN

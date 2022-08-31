@@ -70,5 +70,3 @@ Thread* ThreadPool::GetSuitableThread()
 		});
 	return min->second;
 }
-
-

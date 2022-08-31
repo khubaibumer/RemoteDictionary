@@ -43,15 +43,13 @@ int main(int argc, char** argv)
 			{ "STATS dictionary" }
 		};
 
-		for (auto i = 0; i < 10000; ++i)
+		for (auto i = 0; i < 100000; ++i)
 		{
 			for (const auto& it : testCommands)
 			{
-				std::cout << "Request: " << it << std::endl;
 				client.SendToServer(it);
-				auto response = client.GetResponse();
-
-				std::cout << "Response: " << response << std::endl;
+				auto msg = client.GetResponse();
+				std::cout << msg << std::endl;
 			}
 		}
 	}
@@ -65,12 +63,9 @@ int main(int argc, char** argv)
 		if (inMsg == "quit")
 			break;
 
-		if (client.SendToServer(inMsg))
-		{
-			auto response = client.GetResponse();
-
-			std::cout << "Response: " << response << std::endl;
-		}
+		client.SendToServer(inMsg);
+		auto msg = client.GetResponse();
+		std::cout << msg << std::endl;
 	}
 	return 0;
 }

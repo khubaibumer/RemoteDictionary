@@ -33,4 +33,3 @@ private:
 	std::vector<pthread_t> threadPool_;
 	static std::unordered_map<tid_t, Thread*> threadsRegistry_;
 };
-

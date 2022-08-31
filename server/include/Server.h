@@ -53,7 +53,7 @@ namespace Communication
 
 		static std::string GetResponse(const std::unique_ptr<ServerRequest>& req);
 
-		static size_t SendResponse(const std::unique_ptr<Client>& client, const std::string& response);
+		static size_t SendResponse(int fd, const std::string& response);
 
 		static std::string ConsumeGetRequest(const nlohmann::json& req);
 
@@ -85,5 +85,4 @@ namespace Communication
 		std::unique_ptr<ThreadPool> threadPool_;
 		static const std::unordered_map<std::string, StatType> statTypeMap_;
 	};
-
 } // Communication

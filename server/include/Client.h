@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <cstring>
 #include <sstream>
-#include "Lock.h"
+#include "../../Lock.h"
 
 namespace Communication
 {
@@ -17,8 +17,6 @@ namespace Communication
 		Client(int fd, char* host, char* port) : fd_(fd), host_(host), port_(port)
 		{
 		}
-
-		Client(const Client&) = default;
 
 		explicit Client(const std::pair<std::string, uint16_t>& url);
 

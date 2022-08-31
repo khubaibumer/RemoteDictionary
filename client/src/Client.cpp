@@ -43,6 +43,9 @@ namespace Communication
 	{
 		auto pos = msg.find(' ');
 		auto type = msg.substr(0, pos);
+		if (pos == std::string::npos)
+			return false;
+
 		auto req = msg.substr(pos + 1, msg.size());
 		std::string request;
 		if (type == "GET")
@@ -67,21 +70,30 @@ namespace Communication
 			std::cerr << "Invalid Request" << std::endl;
 			return false;
 		}
-		if (sendto(fd_, request.c_str(), request.size(), 0, (sockaddr*)&addr_, addrLen_) == -1)
+
+		LV outMsg(request.c_str(), request.size());
+		std::lock_guard<std::mutex> l(lock_);
+		if (write(fd_, &outMsg, sizeof outMsg) == -1)
 		{
 			perror("Send To Server Failed ");
 			return false;
 		}
+
 		return true;
 	}
 
 	std::string Client::GetResponse()
 	{
-		char buf[2048] = { 0 };
-		auto read = recvfrom(fd_, buf, sizeof buf, 0, (sockaddr*)&addr_, &addrLen_);
-		if (read > 0)
+		LV data;
+		size_t bytes;
+
 		{
-			auto response = nlohmann::json::parse(buf);
+			std::lock_guard<std::mutex> l(lock_);
+			bytes = read(fd_, &data, sizeof data);
+		}
+		if (bytes > 0)
+		{
+			auto response = nlohmann::json::parse(data.buffer_);
 			return response.dump();
 		}
 		return {};

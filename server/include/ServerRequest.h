@@ -54,5 +54,4 @@ namespace Communication
 		std::chrono::high_resolution_clock::time_point start_;
 		std::chrono::high_resolution_clock::time_point end_;
 	};
-
 }

@@ -204,15 +204,16 @@ namespace Communication
 		}
 	}
 
-	size_t Server::SendResponse(const std::unique_ptr<Client>& client, const std::string& response)
+	size_t Server::SendResponse(int fd, const std::string& response)
 	{
-		return sendto(client->getFd(), response.c_str(), response.size(), 0, client->getAddr(), client->getAddrLen());
+		LV resp(response.c_str(), response.size());
+		return write(fd, &resp, sizeof resp);
 	}
 
 	std::string Server::ConsumeGetRequest(const nlohmann::json& req)
 	{
 		const auto& key = req["KEY"];
-		auto response = Dictionary::getInstance()->fetch(key);
+		auto response = Dictionary::getInstance()->get(key);
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::GET },
 			{ "KEY", key },
@@ -225,8 +226,7 @@ namespace Communication
 	std::string Server::ConsumeSetRequest(const nlohmann::json& req)
 	{
 		const auto& key = req["KEY"];
-		auto dummy = req.dump();
-		auto response = Dictionary::getInstance()->insert(key, req["VALUE"]);
+		auto response = Dictionary::getInstance()->set(key, req["VALUE"]);
 		nlohmann::json rep = {
 			{ "REQUEST", ServerRequestType::SET },
 			{ "KEY", key },

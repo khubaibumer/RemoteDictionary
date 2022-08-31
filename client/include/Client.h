@@ -8,6 +8,8 @@
 #include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <mutex>
+#include "../../Lock.h"
 
 namespace Communication
 {
@@ -19,17 +21,13 @@ namespace Communication
 
 		~Client();
 
-		Client(const Client&)
-		{
-		};
-
 		Client& operator=(const Client&) = delete;
 
 		void ConnectServer();
 
 		bool SendToServer(const std::string& msg);
 
-		std::string GetResponse();
+		[[nodiscard]] std::string GetResponse();
 
 	private:
 		static std::string CreateGetRequest(const std::string& msg);
@@ -46,6 +44,6 @@ namespace Communication
 		std::string ip_;
 		sockaddr_in addr_{};
 		socklen_t addrLen_{};
+		std::mutex lock_;
 	};
-
 } // Communication

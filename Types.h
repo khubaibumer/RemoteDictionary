@@ -4,6 +4,7 @@
 
 #pragma once
 #include <iostream>
+#include <string.h>
 
 using tid_t = long;
 
@@ -14,6 +15,22 @@ enum class ServerRequestType : int8_t
 	SET,
 	UPDATE,
 	STATS
+};
+
+enum class ResultStatus : uint8_t
+{
+	FAILED = 0,
+	SUCCESS
+};
+
+enum class StatType : int8_t
+{
+	INVALID = -1,
+	MIN_TIME,
+	AVG_TIME,
+	MAX_TIME,
+	SUMMARY,
+	DICTIONARY
 };
 
 struct ProgramOptions
@@ -27,12 +44,6 @@ struct ProgramOptions
 	bool enableFilter_;
 	bool benchmark_;
 	std::string ip_;
-};
-
-enum class ResultStatus : uint8_t
-{
-	FAILED = 0,
-	SUCCESS
 };
 
 struct Result
@@ -57,12 +68,15 @@ private:
 	const std::string value_;
 };
 
-enum class StatType : int8_t
+struct __attribute__((packed)) LV
 {
-	INVALID = -1,
-	MIN_TIME,
-	AVG_TIME,
-	MAX_TIME,
-	SUMMARY,
-	DICTIONARY
+	LV() : len_(0)
+	{
+	}
+	LV(const char* in, size_t len) : len_(len)
+	{
+		memcpy(buffer_, in, len);
+	}
+	size_t len_;
+	char buffer_[786 - sizeof(size_t)] = { 0 };
 };

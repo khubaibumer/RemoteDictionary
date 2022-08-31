@@ -26,4 +26,3 @@ protected:
 		return 0;
 	}
 };
-

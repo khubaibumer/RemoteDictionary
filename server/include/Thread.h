@@ -7,9 +7,10 @@
 #include <syscall.h>
 #include <memory>
 #include <semaphore.h>
-#include <list>
 #include <sys/epoll.h>
 #include <unordered_map>
+#include <vector>
+#include <algorithm>
 #include "Client.h"
 #include "../../Types.h"
 
@@ -31,10 +32,14 @@ public:
 
 	void RemoveClient(int fd)
 	{
-		auto client = clientMap_.find(fd);
-		if (client != clientMap_.end())
+		auto client = std::find_if(clients_.begin(), clients_.end(), [fd](const auto& c)
 		{
-			clientMap_.erase(fd);
+		  return c->getFd() == fd;
+		});
+		if (client != clients_.end())
+		{
+			std::cout << "Removed Client! " << client->get()->str() << std::endl;
+			clients_.erase(client);
 			--currentLoad_;
 		}
 	}
@@ -54,15 +59,13 @@ private:
 
 private:
 	tid_t tid_;
-	sem_t sem_{};
 	std::atomic_uint64_t currentLoad_;
 	std::atomic_bool isRunning_;
 	int efd_{};
 	epoll_event event_{};
 	epoll_event* clientEvents_{};
-	char* inMsg_;
-	const size_t inMsgSize_;
-	std::unordered_map<tid_t, std::unique_ptr<Communication::Client>> clientMap_;
+	LV inMsg_{};
+	std::vector<std::unique_ptr<Communication::Client>> clients_;
 };
 
 #define currentThread Thread::getInstance()

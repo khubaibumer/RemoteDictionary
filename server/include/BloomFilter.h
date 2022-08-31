@@ -37,4 +37,3 @@ private:
 	std::hash<std::string> hash_;
 	uint64_t bloomFilter_;
 };
-

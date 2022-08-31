@@ -9,22 +9,19 @@
 
 static constexpr size_t kMaxEvents = 64;
 
-Thread::Thread() : currentLoad_(0), inMsgSize_(1024), isRunning_(true)
+Thread::Thread() : currentLoad_(0), isRunning_(true)
 {
 	tid_ = syscall(SYS_gettid);
-	sem_init(&sem_, 0, 0);
-	inMsg_ = static_cast<char*>(calloc(inMsgSize_, sizeof(char)));
 }
 
 Thread::~Thread()
 {
-	for (const auto& [id, client] : clientMap_)
+	for (const auto& client : clients_)
 	{
-		shutdown(client->getFd(), SHUT_RD);
+		shutdown(client->getFd(), SHUT_RDWR);
 		close(client->getFd());
 	}
 	free(clientEvents_);
-	free(inMsg_);
 }
 
 Thread* Thread::getInstance()
@@ -36,10 +33,11 @@ Thread* Thread::getInstance()
 void Thread::AddClient(std::unique_ptr<Communication::Client> client)
 {
 	std::cout << "New Client added! " << client->str() << std::endl;
-	event_.data.fd = client->getFd();
+	auto fd = client->getFd();
+	event_.data.fd = fd;
 	event_.events = EPOLLIN | EPOLLET;
-	assert(epoll_ctl(efd_, EPOLL_CTL_ADD, client->getFd(), &event_) != -1);
-	clientMap_.emplace(client->getFd(), std::move(client));
+	clients_.push_back(std::move(client));
+	assert(epoll_ctl(efd_, EPOLL_CTL_ADD, fd, &event_) != -1);
 	++currentLoad_;
 }
 
@@ -55,17 +53,16 @@ void Thread::Run()
 		auto ready = epoll_wait(efd_, clientEvents_, kMaxEvents, -1);
 		for (auto i = 0; i < ready && i < kMaxEvents; ++i)
 		{
+			int fd = clientEvents_[i].data.fd;
 			if ((clientEvents_[i].events & EPOLLERR) ||
 				(clientEvents_[i].events & EPOLLHUP) ||
 				(!(clientEvents_[i].events & EPOLLIN)))
 			{
-				RemoveClient(clientEvents_[i].data.fd);
-				continue;
+				RemoveClient(fd);
 			}
 			else
 			{
-				auto msgSz = read(clientEvents_[i].data.fd, &inMsg_[0], inMsgSize_);
-				int fd = clientEvents_[i].data.fd;
+				auto msgSz = read(fd, &inMsg_, sizeof inMsg_);
 				if (msgSz == -1)
 				{
 					// errno should be EAGAIN
@@ -84,12 +81,11 @@ void Thread::Run()
 				}
 				else
 				{
-					inMsg_[msgSz] = 0x00;
-					inMsg_[msgSz + 1] = 0x00;
-					const auto& client = clientMap_[fd];
-					auto req_ = std::make_unique<Communication::ServerRequest>(fd, inMsg_, msgSz);
-					req_->SetResponseSize(Communication::Server::SendResponse(client,
-						Communication::Server::GetResponse(req_)));
+					inMsg_.buffer_[msgSz] = 0x00;
+					inMsg_.buffer_[msgSz + 1] = 0x00;
+					auto req = std::make_unique<Communication::ServerRequest>(fd, inMsg_.buffer_, msgSz);
+					auto response = Communication::Server::GetResponse(req);
+					req->SetResponseSize(Communication::Server::SendResponse(fd, response));
 				}
 			}
 		}

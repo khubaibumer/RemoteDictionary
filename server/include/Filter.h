@@ -20,4 +20,3 @@ public:
 protected:
 	virtual uint64_t getMask(const std::string& key) = 0;
 };
-

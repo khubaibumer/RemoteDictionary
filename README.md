@@ -29,7 +29,7 @@
 >> Get Average Response Time
 
 > STATS summary
->> Get OverAll Response Time
+>> Get OverAll Summary
 
 ## Server Options
 

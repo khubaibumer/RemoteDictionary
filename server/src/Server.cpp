@@ -204,17 +204,10 @@ namespace Communication
 		}
 	}
 
-	size_t Server::SendResponse(const std::unique_ptr<Client>& client, const std::string& response)
-	{
-		LV resp(response.c_str(), response.size());
-		return sendto(client->getFd(), &resp, sizeof resp, 0, client->getAddr(), client->getAddrLen());
-	}
-
 	size_t Server::SendResponse(int fd, const std::string& response)
 	{
 		LV resp(response.c_str(), response.size());
-		return send(fd, &resp, sizeof resp, 0);
-//		return sendto(client->getFd(), &resp, sizeof resp, 0, client->getAddr(), client->getAddrLen());
+		return send(fd, &resp, sizeof resp, MSG_NOSIGNAL);
 	}
 
 	std::string Server::ConsumeGetRequest(const nlohmann::json& req)

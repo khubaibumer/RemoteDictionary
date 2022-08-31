@@ -10,6 +10,7 @@
 #include <sys/epoll.h>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 #include "Client.h"
 #include "../../Types.h"
 
@@ -31,11 +32,14 @@ public:
 
 	void RemoveClient(int fd)
 	{
-		auto client = clientMap_.find(fd);
-		if (client != clientMap_.end())
+		auto client = std::find_if(clients_.begin(), clients_.end(), [fd](const auto& c)
 		{
-			std::cout << "Removed Client! " << client->second->str() << std::endl;
-			clientMap_.erase(fd);
+		  return c->getFd() == fd;
+		});
+		if (client != clients_.end())
+		{
+			std::cout << "Removed Client! " << client->get()->str() << std::endl;
+			clients_.erase(client);
 			--currentLoad_;
 		}
 	}
@@ -61,7 +65,6 @@ private:
 	epoll_event event_{};
 	epoll_event* clientEvents_{};
 	LV inMsg_{};
-	std::unordered_map<tid_t, std::unique_ptr<Communication::Client>> clientMap_;
 	std::vector<std::unique_ptr<Communication::Client>> clients_;
 };
 

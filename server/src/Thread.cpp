@@ -36,7 +36,6 @@ void Thread::AddClient(std::unique_ptr<Communication::Client> client)
 	auto fd = client->getFd();
 	event_.data.fd = fd;
 	event_.events = EPOLLIN | EPOLLET;
-//	clientMap_.emplace(fd, std::move(client));
 	clients_.push_back(std::move(client));
 	assert(epoll_ctl(efd_, EPOLL_CTL_ADD, fd, &event_) != -1);
 	++currentLoad_;
@@ -63,7 +62,7 @@ void Thread::Run()
 			}
 			else
 			{
-				auto msgSz = read(fd, &inMsg_, sizeof inMsg_);
+				auto msgSz = recv(fd, &inMsg_, sizeof inMsg_, MSG_NOSIGNAL);
 				if (msgSz == -1)
 				{
 					// errno should be EAGAIN

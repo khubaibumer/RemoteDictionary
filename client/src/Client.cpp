@@ -42,7 +42,7 @@ namespace Communication
 		assert(0 == connect(fd_, (sockaddr*)&addr_, addrLen_));
 	}
 
-	bool Client::SendToServer(const std::string& msg)
+	bool Client::SendToServer(const std::string& msg) const
 	{
 		auto pos = msg.find(' ');
 		auto type = msg.substr(0, pos);
@@ -75,23 +75,21 @@ namespace Communication
 		}
 
 		LV outMsg(request.c_str(), request.size());
-		if (sendto(fd_, &outMsg, sizeof outMsg, 0, (sockaddr*)&addr_, addrLen_) == -1)
+		if (send(fd_, &outMsg, sizeof outMsg, 0) == -1)
 		{
 			perror("Send To Server Failed ");
 			return false;
 		}
-		sem_post(&sem_);
 
 		return true;
 	}
 
-	std::string Client::GetResponse()
+	std::string Client::GetResponse() const
 	{
 		LV data;
 		size_t read;
 
-		sem_wait(&sem_);
-		read = recvfrom(fd_, &data, sizeof data, 0, (sockaddr*)&addr_, &addrLen_);
+		read = recv(fd_, &data, sizeof data, 0);
 		if (read > 0)
 		{
 			auto response = nlohmann::json::parse(data.buffer_);

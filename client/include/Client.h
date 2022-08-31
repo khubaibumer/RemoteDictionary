@@ -44,6 +44,5 @@ namespace Communication
 		std::string ip_;
 		sockaddr_in addr_{};
 		socklen_t addrLen_{};
-		std::mutex lock_;
 	};
 } // Communication

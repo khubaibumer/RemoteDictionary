@@ -25,9 +25,9 @@ namespace Communication
 
 		void ConnectServer();
 
-		bool SendToServer(const std::string& msg);
+		bool SendToServer(const std::string& msg) const;
 
-		[[nodiscard]] std::string GetResponse();
+		[[nodiscard]] std::string GetResponse() const;
 
 	private:
 		static std::string CreateGetRequest(const std::string& msg);

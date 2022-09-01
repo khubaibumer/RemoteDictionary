@@ -39,7 +39,7 @@ namespace Communication
 		assert(0 == connect(fd_, (sockaddr*)&addr_, addrLen_));
 	}
 
-	bool Client::SendToServer(const std::string& msg)
+	bool Client::SendToServer(const std::string& msg) const
 	{
 		auto pos = msg.find(' ');
 		auto type = msg.substr(0, pos);
@@ -72,7 +72,6 @@ namespace Communication
 		}
 
 		LV outMsg(request.c_str(), request.size());
-		std::lock_guard<std::mutex> l(lock_);
 		if (write(fd_, &outMsg, sizeof outMsg) == -1)
 		{
 			perror("Send To Server Failed ");
@@ -82,15 +81,12 @@ namespace Communication
 		return true;
 	}
 
-	std::string Client::GetResponse()
+	std::string Client::GetResponse() const
 	{
 		LV data;
 		size_t bytes;
 
-		{
-			std::lock_guard<std::mutex> l(lock_);
-			bytes = read(fd_, &data, sizeof data);
-		}
+		bytes = read(fd_, &data, sizeof data);
 		if (bytes > 0)
 		{
 			auto response = nlohmann::json::parse(data.buffer_);
